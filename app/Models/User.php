@@ -18,9 +18,20 @@ class User extends Authenticatable
      * @var array<int, string>
      */
     protected $fillable = [
-        'name',
+        'city_id',
+        'garage_id',
+        'service_type_id',
+        'first_name',
+        'last_name',
         'email',
         'password',
+        'type',
+        'billable_name',
+        'address1',
+        'address2',
+        'zipcode',
+        'phone',
+        'profile_picture',
     ];
 
     /**
@@ -41,4 +52,21 @@ class User extends Authenticatable
     protected $casts = [
         'email_verified_at' => 'datetime',
     ];
+
+
+    public function services()
+    {
+        return $this->belongsToMany(ServiceType::class, 'user_service_types');
+    }
+
+    public function cars()
+    {
+        return $this->hasMany(Car::class);
+    }
+
+
+    public function garages()
+    {
+        return $this->belongsToMany(Garage::class, 'garage_users', 'garage_id', 'user_id');
+    }
 }
