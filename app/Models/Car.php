@@ -13,11 +13,11 @@ class Car extends BaseModel
 
     public function users()
     {
-        return $this->belongsTo(User::class);
+        return $this->belongsTo(User::class, 'user_id');
     }
 
     public function carServices()
     {
-        return $this->hasMany(CarService::class);
+        return $this->hasMany(CarService::class, 'car_id');
     }
 }

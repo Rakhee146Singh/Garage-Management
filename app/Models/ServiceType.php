@@ -2,10 +2,10 @@
 
 namespace App\Models;
 
-use App\Models\BaseModel;
+use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 
-class ServiceType extends BaseModel
+class ServiceType extends Model
 {
     use HasFactory;
 
@@ -18,6 +18,6 @@ class ServiceType extends BaseModel
 
     public function users()
     {
-        return $this->belongsToMany(User::class, 'user_service_types');
+        return $this->belongsToMany(User::class, 'user_service_types', 'user_id', 'service_type_id');
     }
 }

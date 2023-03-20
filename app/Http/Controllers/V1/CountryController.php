@@ -58,7 +58,7 @@ class CountryController extends Controller
     public function create(Request $request)
     {
         $request->validate([
-            'name'         => 'required',
+            'name'         => 'required|alpha|max:30',
         ]);
         $country = Country::create($request->only('name'));
         return ok('Country created successfully!', $country);
@@ -72,7 +72,7 @@ class CountryController extends Controller
      */
     public function show($id)
     {
-        $country = Country::findOrFail($id);
+        $country = Country::with('states')->findOrFail($id);
         return ok('Country retrieved successfully', $country);
     }
 
@@ -86,7 +86,7 @@ class CountryController extends Controller
     {
         $country = Country::findOrFail($id);
         $request->validate([
-            'name'         => 'required',
+            'name'         => 'required|alpha|max:30',
         ]);
         $country->update($request->only('name'));
         return ok('Country updated successfully!', $country);
@@ -100,7 +100,17 @@ class CountryController extends Controller
      */
     public function delete($id)
     {
-        Country::findOrFail($id)->delete();
+        $country = Country::findOrFail($id);
+        if ($country->states()->count() > 0) {
+            $states = $country->states()->get();
+            if ($states->count() > 0) {
+                foreach ($states as $state) {
+                    $state->cities()->delete();
+                    $state->delete();
+                }
+            }
+        }
+        $country->delete();
         return ok('Country deleted successfully');
     }
 }

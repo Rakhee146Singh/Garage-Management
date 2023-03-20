@@ -58,11 +58,11 @@ class CityController extends Controller
     public function create(Request $request)
     {
         $request->validate([
-            'state_id'      => 'required',
-            'name'         => 'required',
+            'state_id'      => 'required|exists:states,id',
+            'name'          => 'required|alpha',
         ]);
         $city = City::create($request->only('state_id', 'name'));
-        return ok('City created successfully!', $city);
+        return ok('City created successfully!', $city->load('states'));
     }
 
     /**
@@ -73,7 +73,7 @@ class CityController extends Controller
      */
     public function show($id)
     {
-        $city = City::findOrFail($id);
+        $city = City::with('states')->findOrFail($id);
         return ok('City retrieved successfully', $city);
     }
 
@@ -87,11 +87,11 @@ class CityController extends Controller
     {
         $city = City::findOrFail($id);
         $request->validate([
-            'state_id'      => 'required',
-            'name'         => 'required',
+            'state_id'      => 'required|exists:states,id',
+            'name'          => 'required|alpha',
         ]);
         $city->update($request->only('state_id', 'name'));
-        return ok('City updated successfully!', $city);
+        return ok('City updated successfully!', $city->load('states'));
     }
 
     /**

@@ -13,6 +13,6 @@ class CarServiceJob extends BaseModel
 
     public function services()
     {
-        return $this->belongsTo(CarService::class);
+        return $this->belongsTo(CarService::class, 'car_service_id');
     }
 }
