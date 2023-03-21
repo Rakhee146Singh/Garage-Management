@@ -112,18 +112,21 @@ class CarServiceJobController extends Controller
      * API for Status of Car Service Job data.
      *
      * @param  \App\CarServiceJob  $id
-     * @return json
+     * @return json $job
      */
     public function status(Request $request, $id)
     {
         $request->validate([
             'status'          => 'required|in:In-Progress,Complete',
         ]);
-        $job = CarServiceJob::findOrFail($id);
-        if ($request->status == 'In-Progress') {
-            dd($job->services()->status->get());
-        }
+
+        $job = CarServiceJob::with('services')->findOrFail($id);
         $job->update($request->only('status'));
+
+        if ($request->status == 'In-Progress' || $request->status == 'Complete') {
+            $service = $job->services;
+            $service->update($request->only('status'));
+        }
         return ok('Car Service status updated successfully', $job);
     }
 }
