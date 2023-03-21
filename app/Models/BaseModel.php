@@ -17,13 +17,13 @@ class BaseModel extends Model
     {
         parent::boot();
         static::creating(function ($model) {
-            $model->created_by = auth()->user() ? auth()->user()->id : User::where('type', 'admin', 'owner', 'mechanic')->first()->id;
+            $model->created_by = auth()->user() ? auth()->user()->id : User::where('type', 'owner', 'mechanic')->first()->id;
         });
         static::updating(function ($model) {
-            $model->updated_by = auth()->user() ? auth()->user()->id : User::where('type', 'admin', 'owner', 'mechanic')->first()->id;
+            $model->updated_by = auth()->user() ? auth()->user()->id : User::where('type', 'owner', 'mechanic')->first()->id;
         });
         static::deleting(function ($model) {
-            $model->updated_by = auth()->user() ? auth()->user()->id : User::where('type', 'admin', 'owner', 'mechanic')->first()->id;
+            $model->updated_by = auth()->user() ? auth()->user()->id : User::where('type', 'owner', 'mechanic')->first()->id;
         });
     }
 }

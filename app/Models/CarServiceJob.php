@@ -11,6 +11,10 @@ class CarServiceJob extends BaseModel
 
     protected $fillable = ['car_service_id', 'user_id', 'service_type_id', 'status'];
 
+    /**
+     *  function for CarServiceJob belongs to CarService
+     *
+     */
     public function services()
     {
         return $this->belongsTo(CarService::class, 'car_service_id');
