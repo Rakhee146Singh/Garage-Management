@@ -11,7 +11,7 @@ class CityController extends Controller
     /**
      * API of listing City data.
      *
-     * @return $cities
+     * @return json $cities
      */
     public function list(Request $request)
     {
@@ -22,7 +22,7 @@ class CityController extends Controller
             'perPage'       => 'nullable|integer',
             'currentPage'   => 'nullable|integer'
         ]);
-        $query = City::query(); //query
+        $query = City::query()->with('states'); //query
 
         /* Searching */
         if (isset($request->search)) {
@@ -43,8 +43,8 @@ class CityController extends Controller
         /* Get records */
         $cities   = $query->get();
         $data       = [
-            'count' => $count,
-            'data'  => $cities
+            'count'     => $count,
+            'cities'    => $cities
         ];
         return ok('City list', $data);
     }
@@ -53,13 +53,13 @@ class CityController extends Controller
      * API of new create City.
      *
      * @param  \Illuminate\Http\Request  $request
-     * @return \Illuminate\Http\Response $city
+     * @return json $city
      */
     public function create(Request $request)
     {
         $request->validate([
             'state_id'      => 'required|exists:states,id',
-            'name'          => 'required|alpha',
+            'name'          => 'required|alpha|max:30',
         ]);
         $city = City::create($request->only('state_id', 'name'));
         return ok('City created successfully!', $city->load('states'));
@@ -69,7 +69,7 @@ class CityController extends Controller
      * API to get City with $id.
      *
      * @param  \App\City  $id
-     * @return \Illuminate\Http\Response $city
+     * @return json $city
      */
     public function show($id)
     {
@@ -81,14 +81,14 @@ class CityController extends Controller
      * API of Update City Data.
      *
      * @param  \App\City  $id
-     * @return \Illuminate\Http\Response $city
+     * @return json $city
      */
     public function update(Request $request, $id)
     {
         $city = City::findOrFail($id);
         $request->validate([
             'state_id'      => 'required|exists:states,id',
-            'name'          => 'required|alpha',
+            'name'          => 'required|alpha|max:30',
         ]);
         $city->update($request->only('state_id', 'name'));
         return ok('City updated successfully!', $city->load('states'));
@@ -98,7 +98,7 @@ class CityController extends Controller
      * API of Delete City data.
      *
      * @param  \App\City  $id
-     * @return \Illuminate\Http\Response
+     * @return json
      */
     public function delete($id)
     {

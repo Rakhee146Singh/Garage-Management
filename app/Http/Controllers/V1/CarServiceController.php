@@ -11,7 +11,7 @@ class CarServiceController extends Controller
     /**
      * API of listing Car Service data.
      *
-     * @return $carservices
+     * @return json $carservices
      */
     public function list(Request $request)
     {
@@ -41,10 +41,10 @@ class CarServiceController extends Controller
             $query          = $query->skip($perPage * ($currentPage - 1))->take($perPage);
         }
         /* Get records */
-        $carservices   = $query->get();
+        $carServices   = $query->get();
         $data       = [
-            'count' => $count,
-            'data'  => $carservices
+            'count'         => $count,
+            'Car Services'  => $carServices
         ];
         return ok('Car Service list', $data);
     }
@@ -53,7 +53,7 @@ class CarServiceController extends Controller
      * API of new create Car Service.
      *
      * @param  \Illuminate\Http\Request  $request
-     * @return \Illuminate\Http\Response $carservice
+     * @return json $carService
      */
     public function create(Request $request)
     {
@@ -61,27 +61,27 @@ class CarServiceController extends Controller
             'garage_id'       => 'required|exists:garages,id',
             'car_id'          => 'required|exists:cars,id',
         ]);
-        $carservice = CarService::create($request->only('garage_id', 'car_id'));
-        return ok('Car Service created successfully!', $carservice->load('jobs'));
+        $carService = CarService::create($request->only('garage_id', 'car_id'));
+        return ok('Car Service created successfully!', $carService->load('jobs'));
     }
 
     /**
      * API to get Car Service with $id.
      *
      * @param  \App\CarService  $id
-     * @return \Illuminate\Http\Response $carservice
+     * @return json $carService
      */
     public function show($id)
     {
-        $carservice = CarService::with('jobs')->findOrFail($id);
-        return ok('Car Service retrieved successfully', $carservice);
+        $carService = CarService::with('jobs')->findOrFail($id);
+        return ok('Car Service retrieved successfully', $carService);
     }
 
     /**
      * API of Update Car Service Data.
      *
      * @param  \App\CarService  $id
-     * @return \Illuminate\Http\Response $carservice
+     * @return json $carService
      */
     public function update(Request $request, $id)
     {
@@ -90,17 +90,17 @@ class CarServiceController extends Controller
             'car_id'          => 'required|exists:cars,id',
         ]);
 
-        $carservice = CarService::findOrFail($id);
-        $carservice->update($request->only('garage_id', 'car_id'));
+        $carService = CarService::findOrFail($id);
+        $carService->update($request->only('garage_id', 'car_id'));
 
-        return ok('Car Service Updated successfully!', $carservice->load('jobs'));
+        return ok('Car Service Updated successfully!', $carService->load('jobs'));
     }
 
     /**
      * API of Delete Car Service data.
      *
      * @param  \App\CarService  $id
-     * @return \Illuminate\Http\Response
+     * @return json
      */
     public function delete($id)
     {
@@ -113,15 +113,15 @@ class CarServiceController extends Controller
      * API for Status of Car Service data.
      *
      * @param  \App\CarService  $id
-     * @return \Illuminate\Http\Response
+     * @return json
      */
     public function status(Request $request, $id)
     {
         $request->validate([
             'status'          => 'required|in:Delivered',
         ]);
-        $carservice = CarService::findOrFail($id);
-        $carservice->update($request->only('status'));
-        return ok('Car Service status updated successfully', $carservice->load('jobs'));
+        $carService = CarService::findOrFail($id);
+        $carService->update($request->only('status'));
+        return ok('Car Service status updated successfully', $carService->load('jobs'));
     }
 }
