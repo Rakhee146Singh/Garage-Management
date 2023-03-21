@@ -113,12 +113,12 @@ class CarServiceController extends Controller
      * API for Status of Car Service data.
      *
      * @param  \App\CarService  $id
-     * @return json
+     * @return json $carService
      */
     public function status(Request $request, $id)
     {
         $request->validate([
-            'status'          => 'required|in:Delivered',
+            'status'          => 'required|in:Delay,Delivered',
         ]);
         $carService = CarService::findOrFail($id);
         $carService->update($request->only('status'));
