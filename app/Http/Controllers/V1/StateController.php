@@ -58,11 +58,11 @@ class StateController extends Controller
     public function create(Request $request)
     {
         $request->validate([
-            'country_id'      => 'required',
-            'name'         => 'required',
+            'country_id'      => 'required|exists:countries,id',
+            'name'            => 'required|alpha',
         ]);
         $state = State::create($request->only('country_id', 'name'));
-        return ok('State created successfully!', $state);
+        return ok('State created successfully!', $state->load('countries'));
     }
 
     /**
@@ -73,7 +73,7 @@ class StateController extends Controller
      */
     public function show($id)
     {
-        $state = State::findOrFail($id);
+        $state = State::with('cities')->findOrFail($id);
         return ok('State retrieved successfully', $state);
     }
 
@@ -87,11 +87,11 @@ class StateController extends Controller
     {
         $state = State::findOrFail($id);
         $request->validate([
-            'country_id'      => 'required',
-            'name'         => 'required',
+            'country_id'      => 'required|exists:countries,id',
+            'name'            => 'required|alpha',
         ]);
         $state->update($request->only('country_id', 'name'));
-        return ok('State updated successfully!', $state);
+        return ok('State updated successfully!', $state->load('countries'));
     }
 
     /**
@@ -102,7 +102,11 @@ class StateController extends Controller
      */
     public function delete($id)
     {
-        State::findOrFail($id)->delete();
+        $state = State::findOrFail($id);
+        if ($state->cities()->count() > 0) {
+            $state->cities()->delete();
+        }
+        $state->delete();
         return ok('State deleted successfully');
     }
 }

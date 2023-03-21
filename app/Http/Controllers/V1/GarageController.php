@@ -58,14 +58,14 @@ class GarageController extends Controller
     public function create(Request $request)
     {
         $request->validate([
-            'city_id'                       => 'required',
-            'state_id'                      => 'required',
-            'country_id'                    => 'required',
-            'name'                          => 'nullable',
-            'address1'                      => 'required',
-            'address2'                      => 'required',
+            'city_id'                       => 'required|exists:cities,id',
+            'state_id'                      => 'required|exists:states,id',
+            'country_id'                    => 'required|exists:countries,id',
+            'name'                          => 'required|string|max:30',
+            'address1'                      => 'required|string|max:50',
+            'address2'                      => 'required|string|max:50',
             'zipcode'                       => 'required|integer|min:6',
-            'user_id'                       => 'required|integer',
+            'user_id'                       => 'required|exists:users,id',
             'services.*'                    => 'required|array',
             'services.*.service_type_id'    => 'required|integer'
         ]);
@@ -74,7 +74,7 @@ class GarageController extends Controller
         //enter data in pivot table
         $garage->users()->attach([$request->user_id => ['is_owner' => true]]);
         $garage->services()->attach($request->services);
-        return ok('Garage created successfully!', $garage);
+        return ok('Garage created successfully!', $garage->load('users', 'services'));
     }
 
     /**
@@ -85,7 +85,7 @@ class GarageController extends Controller
      */
     public function show($id)
     {
-        $country = Garage::findOrFail($id);
+        $country = Garage::with('users', 'services')->findOrFail($id);
         return ok('Country retrieved successfully', $country);
     }
 
@@ -98,14 +98,14 @@ class GarageController extends Controller
     public function update(Request $request, $id)
     {
         $request->validate([
-            'city_id'                       => 'required',
-            'state_id'                      => 'required',
-            'country_id'                    => 'required',
-            'name'                          => 'nullable',
-            'address1'                      => 'required',
-            'address2'                      => 'required',
+            'city_id'                       => 'required|exists:cities,id',
+            'state_id'                      => 'required|exists:states,id',
+            'country_id'                    => 'required|exists:countries,id',
+            'name'                          => 'required|string|max:30',
+            'address1'                      => 'required|string|max:50',
+            'address2'                      => 'required|string|max:50',
             'zipcode'                       => 'required|integer|min:6',
-            'user_id'                       => 'required|integer',
+            'user_id'                       => 'required|exists:users,id',
             'services.*'                    => 'required|array',
             'services.*.service_type_id'    => 'required|integer'
         ]);
@@ -115,7 +115,7 @@ class GarageController extends Controller
         //enter data in pivot table
         $garage->users()->sync([$request->user_id => ['is_owner' => true]]);
         $garage->services()->sync($request->services);
-        return ok('Garage Updated successfully!', $garage);
+        return ok('Garage Updated successfully!', $garage->load('users', 'services'));
     }
 
     /**
@@ -126,7 +126,8 @@ class GarageController extends Controller
      */
     public function delete($id)
     {
-        Garage::findOrFail($id)->delete();
+        $garage = Garage::findOrFail($id);
+        $garage->users()->delete();
         return ok('Garage deleted successfully');
     }
 }

@@ -58,11 +58,10 @@ class CarServiceController extends Controller
     public function create(Request $request)
     {
         $request->validate([
-            'garage_id'       => 'required',
-            'car_id'          => 'required',
-            'status'          => 'required|in:Initiated,In-Progress,Delay,Completed, Delivered',
+            'garage_id'       => 'required|exists:garages,id',
+            'car_id'          => 'required|exists:cars,id',
         ]);
-        $carservice = CarService::create($request->only('garage_id', 'car_id', 'status'));
+        $carservice = CarService::create($request->only('garage_id', 'car_id'));
         return ok('Car Service created successfully!', $carservice->load('jobs'));
     }
 
@@ -87,13 +86,13 @@ class CarServiceController extends Controller
     public function update(Request $request, $id)
     {
         $request->validate([
-            'garage_id'       => 'required',
-            'car_id'          => 'required',
-            'status'          => 'required|in:Initiated,In-Progress,Delay,Completed, Delivered',
+            'garage_id'       => 'required|exists:garages,id',
+            'car_id'          => 'required|exists:cars,id',
         ]);
 
         $carservice = CarService::findOrFail($id);
-        $carservice->update($request->only('garage_id', 'car_id', 'status'));
+        $carservice->update($request->only('garage_id', 'car_id'));
+
         return ok('Car Service Updated successfully!', $carservice->load('jobs'));
     }
 
@@ -105,7 +104,24 @@ class CarServiceController extends Controller
      */
     public function delete($id)
     {
-        CarService::findOrFail($id)->delete();
+        $carService = CarService::findOrFail($id);
+        $carService->jobs()->delete();
         return ok('Car Service deleted successfully');
+    }
+
+    /**
+     * API for Status of Car Service data.
+     *
+     * @param  \App\CarService  $id
+     * @return \Illuminate\Http\Response
+     */
+    public function status(Request $request, $id)
+    {
+        $request->validate([
+            'status'          => 'required|in:Delivered',
+        ]);
+        $carservice = CarService::findOrFail($id);
+        $carservice->update($request->only('status'));
+        return ok('Car Service status updated successfully', $carservice->load('jobs'));
     }
 }

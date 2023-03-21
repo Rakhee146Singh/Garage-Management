@@ -23,11 +23,19 @@ class Garage extends BaseModel
         'deleted_by'
     ];
 
+    /**
+     *  function for Garage belongsToMany ServiceType
+     *
+     */
     public function services()
     {
         return $this->belongsToMany(ServiceType::class, 'garage_service_types', 'garage_id', 'service_type_id');
     }
 
+    /**
+     *  function for Garage belongsToMany Users
+     *
+     */
     public function users()
     {
         return $this->belongsToMany(User::class, 'garage_users', 'garage_id', 'user_id')->withPivot('is_owner');

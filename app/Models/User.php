@@ -32,6 +32,9 @@ class User extends Authenticatable
         'zipcode',
         'phone',
         'profile_picture',
+        'created_by',
+        'updated_by',
+        'deleted_by'
     ];
 
     /**
@@ -54,9 +57,9 @@ class User extends Authenticatable
     ];
 
 
-    public function services()
+    public function service()
     {
-        return $this->belongsToMany(ServiceType::class, 'user_service_types');
+        return $this->belongsToMany(ServiceType::class, 'user_service_types', 'user_id', 'service_type_id');
     }
 
     public function cars()
@@ -67,6 +70,21 @@ class User extends Authenticatable
 
     public function garages()
     {
-        return $this->belongsToMany(Garage::class, 'garage_users', 'garage_id', 'user_id');
+        return $this->belongsToMany(Garage::class, 'garage_users', 'user_id', 'garage_id');
+    }
+
+    /**
+     *  function for created_by and updated_by data for users
+     *
+     */
+    public static function boot()
+    {
+        parent::boot();
+        static::creating(function ($model) {
+            $model->created_by = auth()->user() ? auth()->user()->id : User::where('type', 'admin')->first()->id ?? null;
+        });
+        static::updating(function ($model) {
+            $model->updated_by = auth()->user() ? auth()->user()->id : User::where('type', 'admin')->first()->id;
+        });
     }
 }

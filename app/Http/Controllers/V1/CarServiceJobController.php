@@ -58,12 +58,11 @@ class CarServiceJobController extends Controller
     public function create(Request $request)
     {
         $request->validate([
-            'car_service_id'      => 'required',
-            'user_id'               => 'required',
-            'service_type_id'       => 'required',
-            'status'                => 'required|in:Pending,In-Progress,Complete',
+            'car_service_id'        => 'required|exists:car_services,id',
+            'user_id'               => 'required|exists:users,id',
+            'service_type_id'       => 'required|exists:service_types,id',
         ]);
-        $job = CarServiceJob::create($request->only('car_service_id', 'user_id', 'service_type_id', 'status'));
+        $job = CarServiceJob::create($request->only('car_service_id', 'user_id', 'service_type_id'));
         return ok('Car Service Job created successfully!', $job);
     }
 
@@ -88,13 +87,12 @@ class CarServiceJobController extends Controller
     public function update(Request $request, $id)
     {
         $request->validate([
-            'car_service_id'      => 'required',
-            'user_id'               => 'required',
-            'service_type_id'       => 'required',
-            'status'                => 'required|in:Pending,In-Progress,Complete',
+            'car_service_id'        => 'required|exists:car_services,id',
+            'user_id'               => 'required|exists:users,id',
+            'service_type_id'       => 'required|exists:service_types,id',
         ]);
         $job = CarServiceJob::findOrFail($id);
-        $job->update($request->only('car_service_id', 'user_id', 'service_type_id', 'status'));
+        $job->update($request->only('car_service_id', 'user_id', 'service_type_id'));
         return ok('Car Service Job updated successfully!', $job);
     }
 
@@ -108,5 +106,24 @@ class CarServiceJobController extends Controller
     {
         CarServiceJob::findOrFail($id)->delete();
         return ok('Car Service deleted successfully');
+    }
+
+    /**
+     * API for Status of Car Service Job data.
+     *
+     * @param  \App\CarServiceJob  $id
+     * @return \Illuminate\Http\Response
+     */
+    public function status(Request $request, $id)
+    {
+        $request->validate([
+            'status'          => 'required|in:In-Progress,Complete',
+        ]);
+        $job = CarServiceJob::findOrFail($id);
+        if ($request->status == 'In-Progress') {
+            dd($job->services()->status->get());
+        }
+        $job->update($request->only('status'));
+        return ok('Car Service status updated successfully', $job);
     }
 }

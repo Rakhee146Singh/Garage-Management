@@ -58,10 +58,10 @@ class CarController extends Controller
     public function create(Request $request)
     {
         $request->validate([
-            'user_id'               => 'required',
-            'company_name'          => 'required',
-            'model_name'            => 'required',
-            'manufacturing_year'    => 'required'
+            'user_id'               => 'required|exists:users,id',
+            'company_name'          => 'required|alpha|max:20',
+            'model_name'            => 'required|string|max:30',
+            'manufacturing_year'    => 'required|date_format:Y'
         ]);
         $car = Car::create($request->only('user_id', 'company_name', 'model_name', 'manufacturing_year'));
         return ok('Car created successfully!', $car->load('carServices'));
@@ -88,10 +88,10 @@ class CarController extends Controller
     public function update(Request $request, $id)
     {
         $request->validate([
-            'user_id'               => 'required',
-            'company_name'          => 'required',
-            'model_name'            => 'required',
-            'manufacturing_year'    => 'required'
+            'user_id'               => 'required|exists:users,id',
+            'company_name'          => 'required|alpha|max:20',
+            'model_name'            => 'required|string|max:30',
+            'manufacturing_year'    => 'required|date_format:Y'
         ]);
 
         $car = Car::findOrFail($id);
@@ -107,7 +107,8 @@ class CarController extends Controller
      */
     public function delete($id)
     {
-        Car::findOrFail($id)->delete();
+        $car = Car::findOrFail($id);
+        $car->carServices()->delete();
         return ok('Car deleted successfully');
     }
 }

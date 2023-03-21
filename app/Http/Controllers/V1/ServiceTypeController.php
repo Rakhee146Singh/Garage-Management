@@ -58,7 +58,7 @@ class ServiceTypeController extends Controller
     public function create(Request $request)
     {
         $request->validate([
-            'name'         => 'required',
+            'name'         => 'required|alpha|max:30',
         ]);
         $service = ServiceType::create($request->only('name'));
         return ok('Service Type created successfully!', $service);
@@ -86,7 +86,7 @@ class ServiceTypeController extends Controller
     {
         $service = ServiceType::findOrFail($id);
         $request->validate([
-            'name'         => 'required',
+            'name'         => 'required|alpha|max:30',
         ]);
         $service->update($request->only('name'));
         return ok('Service Type updated successfully!', $service);
