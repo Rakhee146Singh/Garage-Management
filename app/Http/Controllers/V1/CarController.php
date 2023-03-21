@@ -11,7 +11,7 @@ class CarController extends Controller
     /**
      * API of listing Car data.
      *
-     * @return $cars
+     * @return json $cars
      */
     public function list(Request $request)
     {
@@ -44,7 +44,7 @@ class CarController extends Controller
         $cars   = $query->get();
         $data       = [
             'count' => $count,
-            'data'  => $cars
+            'cars'  => $cars
         ];
         return ok('Car list', $data);
     }
@@ -53,7 +53,7 @@ class CarController extends Controller
      * API of new create Car.
      *
      * @param  \Illuminate\Http\Request  $request
-     * @return \Illuminate\Http\Response $car
+     * @return json $car
      */
     public function create(Request $request)
     {
@@ -71,7 +71,7 @@ class CarController extends Controller
      * API to get Car with $id.
      *
      * @param  \App\Car  $id
-     * @return \Illuminate\Http\Response $car
+     * @return json $car
      */
     public function show($id)
     {
@@ -83,7 +83,7 @@ class CarController extends Controller
      * API of Update Car Data.
      *
      * @param  \App\Car  $id
-     * @return \Illuminate\Http\Response $car
+     * @return json $car
      */
     public function update(Request $request, $id)
     {
@@ -103,7 +103,7 @@ class CarController extends Controller
      * API of Delete Car data.
      *
      * @param  \App\Car  $id
-     * @return \Illuminate\Http\Response
+     * @return json
      */
     public function delete($id)
     {

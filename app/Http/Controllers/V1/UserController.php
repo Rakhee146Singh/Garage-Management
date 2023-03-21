@@ -17,7 +17,7 @@ class UserController extends Controller
     /**
      * API of listing User data.
      *
-     * @return $users
+     * @return json $users
      */
     public function list(Request $request)
     {
@@ -28,11 +28,11 @@ class UserController extends Controller
             'perPage'       => 'nullable|integer',
             'currentPage'   => 'nullable|integer'
         ]);
-        $query = User::query(); //query
+        $query = User::query()->with('garages', 'service', 'cars'); //query
 
         /* Searching */
         if (isset($request->search)) {
-            $query = $query->where("first_name", "LIKE", "%{$request->search}%");
+            $query = $query->where("type", "LIKE", "%{$request->search}%");
         }
         /* Sorting */
         if ($request->sortField || $request->sortOrder) {
@@ -50,7 +50,7 @@ class UserController extends Controller
         $users   = $query->get();
         $data       = [
             'count' => $count,
-            'data'  => $users
+            'users'  => $users
         ];
         return ok('User list', $data);
     }
@@ -59,7 +59,7 @@ class UserController extends Controller
      * API of new create User.
      *
      * @param  \Illuminate\Http\Request  $request
-     * @return \Illuminate\Http\Response $user
+     * @return json $user
      */
     public function create(Request $request)
     {
@@ -107,7 +107,7 @@ class UserController extends Controller
      * API to get User with $id.
      *
      * @param  \App\User  $id
-     * @return \Illuminate\Http\Response $user
+     * @return json $user
      */
     public function show($id)
     {
@@ -119,7 +119,7 @@ class UserController extends Controller
      * API of Update User Data.
      *
      * @param  \App\User  $id
-     * @return \Illuminate\Http\Response $user
+     * @return json $user
      */
     public function update(Request $request, $id)
     {
@@ -158,7 +158,7 @@ class UserController extends Controller
      * API of Delete User data.
      *
      * @param  \App\User  $id
-     * @return \Illuminate\Http\Response
+     * @return json
      */
     public function delete($id)
     {
@@ -173,7 +173,7 @@ class UserController extends Controller
      * API of User login
      *
      * @param  \Illuminate\Http\Request  $request
-     * @return $token
+     * @return json $token
      */
     public function login(Request $request)
     {

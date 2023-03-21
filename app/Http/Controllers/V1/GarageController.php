@@ -11,7 +11,7 @@ class GarageController extends Controller
     /**
      * API of listing Garage data.
      *
-     * @return $garages
+     * @return json $garages
      */
     public function list(Request $request)
     {
@@ -22,7 +22,7 @@ class GarageController extends Controller
             'perPage'       => 'nullable|integer',
             'currentPage'   => 'nullable|integer'
         ]);
-        $query = Garage::query(); //query
+        $query = Garage::query()->with('users', 'services'); //query
 
         /* Searching */
         if (isset($request->search)) {
@@ -43,8 +43,8 @@ class GarageController extends Controller
         /* Get records */
         $garages  = $query->get();
         $data       = [
-            'count' => $count,
-            'data'  => $garages
+            'count'     => $count,
+            'garages'   => $garages
         ];
         return ok('Garage list', $data);
     }
@@ -53,7 +53,7 @@ class GarageController extends Controller
      * API of new create Garage.
      *
      * @param  \Illuminate\Http\Request  $request
-     * @return \Illuminate\Http\Response $garage
+     * @return json $garage
      */
     public function create(Request $request)
     {
@@ -81,7 +81,7 @@ class GarageController extends Controller
      * API to get Garage with $id.
      *
      * @param  \App\Country  $id
-     * @return \Illuminate\Http\Response $garage
+     * @return json $garage
      */
     public function show($id)
     {
@@ -93,7 +93,7 @@ class GarageController extends Controller
      * API of Update Garage Data.
      *
      * @param  \App\Garage  $id
-     * @return \Illuminate\Http\Response $garage
+     * @return json $garage
      */
     public function update(Request $request, $id)
     {
@@ -122,7 +122,7 @@ class GarageController extends Controller
      * API of Delete Garage data.
      *
      * @param  \App\Garage  $id
-     * @return \Illuminate\Http\Response
+     * @return json
      */
     public function delete($id)
     {

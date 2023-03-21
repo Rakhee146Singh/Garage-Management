@@ -11,7 +11,7 @@ class CarServiceJobController extends Controller
     /**
      * API of listing Car Service Job data.
      *
-     * @return $jobs
+     * @return json $jobs
      */
     public function list(Request $request)
     {
@@ -44,7 +44,7 @@ class CarServiceJobController extends Controller
         $jobs  = $query->get();
         $data       = [
             'count' => $count,
-            'data'  => $jobs
+            'jobs'  => $jobs
         ];
         return ok('Car Service Job list', $data);
     }
@@ -53,7 +53,7 @@ class CarServiceJobController extends Controller
      * API of new create Car Service Job.
      *
      * @param  \Illuminate\Http\Request  $request
-     * @return \Illuminate\Http\Response $job
+     * @return json $job
      */
     public function create(Request $request)
     {
@@ -70,7 +70,7 @@ class CarServiceJobController extends Controller
      * API to get Car Service Job with $id.
      *
      * @param  \App\CarServiceJob  $id
-     * @return \Illuminate\Http\Response $job
+     * @return json $job
      */
     public function show($id)
     {
@@ -82,7 +82,7 @@ class CarServiceJobController extends Controller
      * API of Update Car Service Job Data.
      *
      * @param  \App\CarServiceJob  $id
-     * @return \Illuminate\Http\Response $job
+     * @return json $job
      */
     public function update(Request $request, $id)
     {
@@ -100,7 +100,7 @@ class CarServiceJobController extends Controller
      * API of Delete Car Service Job data.
      *
      * @param  \App\CarServiceJob  $id
-     * @return \Illuminate\Http\Response
+     * @return json
      */
     public function delete($id)
     {
@@ -112,7 +112,7 @@ class CarServiceJobController extends Controller
      * API for Status of Car Service Job data.
      *
      * @param  \App\CarServiceJob  $id
-     * @return \Illuminate\Http\Response
+     * @return json
      */
     public function status(Request $request, $id)
     {

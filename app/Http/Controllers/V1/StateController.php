@@ -11,7 +11,7 @@ class StateController extends Controller
     /**
      * API of listing State data.
      *
-     * @return $states
+     * @return json $states
      */
     public function list(Request $request)
     {
@@ -22,7 +22,7 @@ class StateController extends Controller
             'perPage'       => 'nullable|integer',
             'currentPage'   => 'nullable|integer'
         ]);
-        $query = State::query(); //query
+        $query = State::query()->with('cities', 'countries'); //query
 
         /* Searching */
         if (isset($request->search)) {
@@ -43,8 +43,8 @@ class StateController extends Controller
         /* Get records */
         $states   = $query->get();
         $data       = [
-            'count' => $count,
-            'data'  => $states
+            'count'     => $count,
+            'states'    => $states
         ];
         return ok('State list', $data);
     }
@@ -53,13 +53,13 @@ class StateController extends Controller
      * API of new create State.
      *
      * @param  \Illuminate\Http\Request  $request
-     * @return \Illuminate\Http\Response $state
+     * @return json $state
      */
     public function create(Request $request)
     {
         $request->validate([
             'country_id'      => 'required|exists:countries,id',
-            'name'            => 'required|alpha',
+            'name'            => 'required|alpha|max:30',
         ]);
         $state = State::create($request->only('country_id', 'name'));
         return ok('State created successfully!', $state->load('countries'));
@@ -69,7 +69,7 @@ class StateController extends Controller
      * API to get State with $id.
      *
      * @param  \App\State  $id
-     * @return \Illuminate\Http\Response $state
+     * @return json $state
      */
     public function show($id)
     {
@@ -81,14 +81,14 @@ class StateController extends Controller
      * API of Update State Data.
      *
      * @param  \App\State  $id
-     * @return \Illuminate\Http\Response $state
+     * @return json $state
      */
     public function update(Request $request, $id)
     {
         $state = State::findOrFail($id);
         $request->validate([
             'country_id'      => 'required|exists:countries,id',
-            'name'            => 'required|alpha',
+            'name'            => 'required|alpha|max:30',
         ]);
         $state->update($request->only('country_id', 'name'));
         return ok('State updated successfully!', $state->load('countries'));
@@ -98,7 +98,7 @@ class StateController extends Controller
      * API of Delete State data.
      *
      * @param  \App\State  $id
-     * @return \Illuminate\Http\Response
+     * @return json
      */
     public function delete($id)
     {

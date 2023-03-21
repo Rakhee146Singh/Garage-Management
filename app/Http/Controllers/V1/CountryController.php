@@ -11,7 +11,7 @@ class CountryController extends Controller
     /**
      * API of listing Country data.
      *
-     * @return $countries
+     * @return json $countries
      */
     public function list(Request $request)
     {
@@ -22,7 +22,7 @@ class CountryController extends Controller
             'perPage'       => 'nullable|integer',
             'currentPage'   => 'nullable|integer'
         ]);
-        $query = Country::query(); //query
+        $query = Country::query()->with('states'); //query
 
         /* Searching */
         if (isset($request->search)) {
@@ -43,8 +43,8 @@ class CountryController extends Controller
         /* Get records */
         $countries   = $query->get();
         $data       = [
-            'count' => $count,
-            'data'  => $countries
+            'count'         => $count,
+            'countries'     => $countries
         ];
         return ok('Country list', $data);
     }
@@ -53,7 +53,7 @@ class CountryController extends Controller
      * API of new create Country.
      *
      * @param  \Illuminate\Http\Request  $request
-     * @return \Illuminate\Http\Response $country
+     * @return json $country
      */
     public function create(Request $request)
     {
@@ -68,7 +68,7 @@ class CountryController extends Controller
      * API to get Country with $id.
      *
      * @param  \App\Country  $id
-     * @return \Illuminate\Http\Response $country
+     * @return json $country
      */
     public function show($id)
     {
@@ -80,7 +80,7 @@ class CountryController extends Controller
      * API of Update Country Data.
      *
      * @param  \App\Country  $id
-     * @return \Illuminate\Http\Response $country
+     * @return json $country
      */
     public function update(Request $request, $id)
     {
@@ -96,7 +96,7 @@ class CountryController extends Controller
      * API of Delete Country data.
      *
      * @param  \App\Country  $id
-     * @return \Illuminate\Http\Response
+     * @return json
      */
     public function delete($id)
     {

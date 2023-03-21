@@ -11,12 +11,12 @@ class ServiceTypeController extends Controller
     /**
      * API of listing ServiceType data.
      *
-     * @return $services
+     * @return json $services
      */
     public function list(Request $request)
     {
         $request->validate([
-            'search'        => 'nullable|integer|digits:4',
+            'search'        => 'nullable|string',
             'sortOrder'     => 'nullable|in:asc,desc',
             'sortField'     => 'nullable|string',
             'perPage'       => 'nullable|integer',
@@ -43,8 +43,8 @@ class ServiceTypeController extends Controller
         /* Get records */
         $services   = $query->get();
         $data       = [
-            'count' => $count,
-            'data'  => $services
+            'count'     => $count,
+            'services'  => $services
         ];
         return ok('Service Type list', $data);
     }
@@ -53,7 +53,7 @@ class ServiceTypeController extends Controller
      * API of new create ServiceType.
      *
      * @param  \Illuminate\Http\Request  $request
-     * @return \Illuminate\Http\Response $service
+     * @return json $service
      */
     public function create(Request $request)
     {
@@ -68,7 +68,7 @@ class ServiceTypeController extends Controller
      * API to get ServiceType with $id.
      *
      * @param  \App\ServiceType  $id
-     * @return \Illuminate\Http\Response $service
+     * @return json $service
      */
     public function show($id)
     {
@@ -80,7 +80,7 @@ class ServiceTypeController extends Controller
      * API of Update ServiceType Data.
      *
      * @param  \App\ServiceType  $id
-     * @return \Illuminate\Http\Response $service
+     * @return json $service
      */
     public function update(Request $request, $id)
     {
@@ -96,7 +96,7 @@ class ServiceTypeController extends Controller
      * API of Delete ServiceType data.
      *
      * @param  \App\ServiceType  $id
-     * @return \Illuminate\Http\Response
+     * @return json
      */
     public function delete($id)
     {
