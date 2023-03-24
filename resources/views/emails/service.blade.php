@@ -45,6 +45,7 @@ Thanks,<br>
             </thead>
             @foreach ($cars as $car)
                 <tr>
+                    <td>{{ $car->id }}</td>
                     <td>{{ $car->company_name }}</td>
                     <td>{{ $car->model_name }}</td>
                     <td>{{ $car->manufacturing_year }}</td>

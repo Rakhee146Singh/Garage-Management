@@ -22,7 +22,7 @@ class StateController extends Controller
             'perPage'       => 'nullable|integer',
             'currentPage'   => 'nullable|integer'
         ]);
-        $query = State::query()->with('cities', 'countries'); //query
+        $query = State::query(); //query
 
         /* Searching */
         if (isset($request->search)) {

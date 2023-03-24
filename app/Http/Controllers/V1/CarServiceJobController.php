@@ -120,7 +120,7 @@ class CarServiceJobController extends Controller
             'status'          => 'required|in:In-Progress,Complete',
         ]);
 
-        $job = CarServiceJob::with('services')->findOrFail($id);
+        $job = CarServiceJob::findOrFail($id);
         $job->update($request->only('status'));
 
         if ($request->status == 'In-Progress' || $request->status == 'Complete') {

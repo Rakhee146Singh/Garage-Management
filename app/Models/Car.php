@@ -17,7 +17,7 @@ class Car extends BaseModel
      */
     public function users()
     {
-        return $this->belongsTo(User::class, 'user_id');
+        return $this->belongsTo(User::class, 'user_id')->select('id', 'city_id', 'first_name', 'email', 'address1', 'phone', 'profile_picture');
     }
 
     /**
@@ -26,6 +26,6 @@ class Car extends BaseModel
      */
     public function carServices()
     {
-        return $this->hasMany(CarService::class, 'car_id');
+        return $this->hasMany(CarService::class, 'car_id')->select('id', 'garage_id', 'car_id', 'status');
     }
 }

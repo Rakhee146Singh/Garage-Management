@@ -2,15 +2,14 @@
 
 namespace App\Http\Controllers\V1;
 
-use App\Models\Car;
 use App\Models\User;
-use App\Models\Garage;
 use App\Mail\ServiceMail;
 use App\Models\GarageUser;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Mail;
+use Illuminate\Support\Facades\Storage;
 
 class UserController extends Controller
 {
@@ -28,7 +27,7 @@ class UserController extends Controller
             'perPage'       => 'nullable|integer',
             'currentPage'   => 'nullable|integer'
         ]);
-        $query = User::query()->with('garages', 'service', 'cars'); //query
+        $query = User::query(); //query
 
         /* Searching */
         if (isset($request->search)) {
@@ -141,12 +140,12 @@ class UserController extends Controller
         ]);
         $request['password'] = Hash::make($request->password);
         $user = User::findOrFail($id);
-        // if ($user->profile_picture) {
-        //     Storage::delete("public/profiles/" . $user->profile_picture);
-        // }
 
-        $imageName = str_replace(".", "", (string)microtime(true)) . '.' . $request->profile_picture->getClientOriginalExtension();
-        $request->profile_picture->storeAs("public/profiles", $imageName);
+        if ($user->profile_picture) {
+            Storage::delete("public/profiles/" . $user->profile_picture);
+            $imageName = str_replace(".", "", (string)microtime(true)) . '.' . $request->profile_picture->getClientOriginalExtension();
+            $request->profile_picture->storeAs("public/profiles", $imageName);
+        }
 
         $user->update($request->only('city_id', 'first_name', 'last_name', 'email', 'password', 'type', 'billable_name', 'address1', 'address2', 'zipcode', 'phone') + ['profile_picture' => $imageName]);
         $user->service()->syncWithoutDetaching($request->service_type_id);
@@ -167,47 +166,5 @@ class UserController extends Controller
         $user->service()->delete();
         $user->delete();
         return ok('User deleted successfully');
-    }
-
-    /**
-     * API of User login
-     *
-     * @param  \Illuminate\Http\Request  $request
-     * @return json $token
-     */
-    public function login(Request $request)
-    {
-        $request->validate([
-            'email'    => 'required|email',
-            'password' => 'required',
-        ]);
-
-        $user = User::where('email', $request->email)->first();
-        if (!$user) {
-            return error("User with this email is not found!");
-        }
-        if ($user && Hash::check($request->password, $user->password)) {
-            $token = $user->createToken($request->email)->plainTextToken;
-
-            $data = [
-                'token' => $token,
-                'user'  => $user
-            ];
-            return ok('User Logged in Succesfully', $data);
-        } else {
-            return error("Password is incorrect");
-        }
-    }
-
-    /**
-     * API of User Logout
-     *
-     * @param  \Illuminate\Http\Request  $request
-     */
-    public function logout()
-    {
-        auth()->user()->currentAccessToken()->delete();
-
-        return ok("Logged out successfully!");
     }
 }

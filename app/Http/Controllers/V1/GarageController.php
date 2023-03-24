@@ -22,7 +22,7 @@ class GarageController extends Controller
             'perPage'       => 'nullable|integer',
             'currentPage'   => 'nullable|integer'
         ]);
-        $query = Garage::query()->with('users', 'services'); //query
+        $query = Garage::query(); //query
 
         /* Searching */
         if (isset($request->search)) {

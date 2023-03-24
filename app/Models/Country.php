@@ -18,6 +18,6 @@ class Country extends Model
      */
     public function states()
     {
-        return $this->hasMany(State::class, 'country_id');
+        return $this->hasMany(State::class, 'country_id')->select('id', 'country_id', 'name');
     }
 }

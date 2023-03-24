@@ -20,10 +20,15 @@ class CarController extends Controller
             'sortOrder'     => 'nullable|in:asc,desc',
             'sortField'     => 'nullable|string',
             'perPage'       => 'nullable|integer',
-            'currentPage'   => 'nullable|integer'
+            'currentPage'   => 'nullable|integer',
+            'user_id'       => 'nullable|exists:users,id'
         ]);
-        $query = Car::query(); //query
+        // dd($request->user_id);
+        $query = Car::query()->with('carServices.jobs.users'); //query
 
+        if ($request->user_id) {
+            $query = $query->where('user_id', $request->user_id);
+        }
         /* Searching */
         if (isset($request->search)) {
             $query = $query->where("company_name", "LIKE", "%{$request->search}%");
