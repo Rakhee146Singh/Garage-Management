@@ -26,7 +26,11 @@ class GarageController extends Controller
             'country_id'    => 'nullable|exists:countries,id',
         ]);
         $query = Garage::query()->with('cities')->first(); //query
+        /* No result for above query */
         if (auth()->user()->type == 'Owner') {
+            // Code explanation is missing
+
+            /* No result of bellow query */
             $query->whereHas('users', function ($query) {
                 $query->where('id', Auth()->id);
             });
@@ -34,6 +38,7 @@ class GarageController extends Controller
 
         /* Filters */
         if ($request->city_id) {
+            /* No meaning for redundant code of duplication of cities*/
             $query->whereHas('cities', function ($query) use ($request) {
                 $query->where('id', $request->city_id);
             });
@@ -68,6 +73,7 @@ class GarageController extends Controller
         }
         /* Get records */
         $garages  = $query->get();
+        /* No meaning of ->get() if you are showing first record of garage */
         $data       = [
             'count'     => $count,
             'garages'   => $garages
@@ -76,6 +82,7 @@ class GarageController extends Controller
     }
 
     /**
+     * ALERT : THIS API IS NOT IN USE, AS PER REQUIREMENT
      * API of new create Garage.
      *
      * @param  \Illuminate\Http\Request  $request

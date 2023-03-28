@@ -91,6 +91,8 @@ class CarController extends Controller
         $owner = User::findOrFail($owner_data->user_id);
         Mail::to($owner->email)->send(new ServiceMail($owner, $user, $cars));
 
+        /* WRONG FLOW */
+
         return ok('Car created successfully!', $car->load('carServices'));
     }
 

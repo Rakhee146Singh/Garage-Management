@@ -17,7 +17,7 @@ class CarServiceJobController extends Controller
     // public function list(Request $request)
     // {
     //     $request->validate([
-    //         'search'        => 'nullable|string',
+    //         'search'        => 'nullable|striCarServiceJobControllerng',
     //         'sortOrder'     => 'nullable|in:asc,desc',
     //         'sortField'     => 'nullable|string',
     //         'perPage'       => 'nullable|integer',
@@ -58,6 +58,7 @@ class CarServiceJobController extends Controller
      */
     public function create(Request $request)
     {
+        /* WORNG FLOW */
         $request->validate([
             'car_service_id'        => 'required|exists:car_services,id',
             'user_id'               => 'required|exists:users,id',
@@ -115,6 +116,7 @@ class CarServiceJobController extends Controller
         $job->update($request->only('status'));
 
         if ($request->status == 'In-Progress' || $request->status == 'Complete') {
+            /* status should be enum */
             $service = $job->services;
             $service->update($request->only('status'));
         }
