@@ -37,7 +37,7 @@
 </head>
 
 <body>
-    <h1>Hello.. {{ auth()->user()->name }}</h1>
+    <h1>Hello..</h1>
     <hr>
     <h4>You are receiving this email because we received a password reset request for your account.</h4>
     <p>We cannot simply send you your old password. A unique link to reset your password has been generated for you.

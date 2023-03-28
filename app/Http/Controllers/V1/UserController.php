@@ -4,6 +4,7 @@ namespace App\Http\Controllers\V1;
 
 use App\Models\User;
 use App\Mail\ServiceMail;
+use App\Models\CarService;
 use App\Models\GarageUser;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
@@ -28,7 +29,12 @@ class UserController extends Controller
             'currentPage'   => 'nullable|integer'
         ]);
         $query = User::query(); //query
-
+        // dd($query);
+        if (auth()->user()->type == 'Owner') {
+            $query = User::query()->whereHas('garages', function ($query) {
+                $query->where('id', Auth()->id);
+            });
+        }
         /* Searching */
         if (isset($request->search)) {
             $query = $query->where("type", "LIKE", "%{$request->search}%");
@@ -66,10 +72,10 @@ class UserController extends Controller
             'city_id'                       => 'required|exists:cities,id',
             'first_name'                    => 'required|alpha|max:30',
             'last_name'                     => 'required|alpha|max:30',
-            'email'                         => 'required|email',
+            'email'                         => 'required|email|unique:users',
             'password'                      => 'required|string|max:8',
             'type'                          => 'required|in:mechanic,customer,owner',
-            'billable_name'                 => 'nullable|string|max:20',
+            'billable_name'                 => 'nullable|string',
             'address1'                      => 'required|string|max:100',
             'address2'                      => 'required|string|max:100',
             'zipcode'                       => 'required|integer|min:6',
@@ -81,24 +87,36 @@ class UserController extends Controller
             'cars.*.company_name'           => 'required_if:type,customer|alpha|max:20',
             'cars.*.model_name'             => 'required_if:type,customer|string|max:20',
             'cars.*.manufacturing_year'     => 'required_if:type,customer|date_format:Y',
+            'cars.*.service_type_id.*'      => 'required_if:type,customer',
         ]);
         $request['password'] = Hash::make($request->password);
         $imageName = str_replace(".", "", (string)microtime(true)) . '.' . $request->profile_picture->getClientOriginalExtension();
         $request->profile_picture->storeAs("public/profiles", $imageName);
+        $billable_name = $request->first_name . " " . $request->last_name;
+        $user = User::create($request->only('city_id', 'first_name', 'last_name', 'email', 'password', 'type', 'address1', 'address2', 'zipcode', 'phone') + ['billable_name' => $billable_name] + ['profile_picture' => $imageName]);
 
-        $user = User::create($request->only('city_id', 'first_name', 'last_name', 'email', 'password', 'type', 'billable_name', 'address1', 'address2', 'zipcode', 'phone') + ['profile_picture' => $imageName]);
-
+        //insert data in pivot table for customer and mechanic
         if ($user->type != 'owner') {
             $user->service()->syncWithoutDetaching($request->service_type_id);
             $user->garages()->attach([$request->garage_id => ['is_owner' => false]]);
         }
+        //insert car and service type detail when user register with pivot table insertion
         if ($user->type == 'customer') {
-            $cars = $user->cars()->createMany($request->cars);
+            $cars = [];
+            foreach ($request->cars as $data) {
+                $car = $user->cars()->create($data);
+                foreach ($data['service_type_id'] as $service) {
+                    $car->types()->attach(['car_id' => $car->id], ['service_type_id' => $service]);
+                }
+                CarService::create(['garage_id' => $request->garage_id, 'car_id' => $car->id]);
+                array_push($cars, $car);
+            }
+
+            //sending mail to owner with customer car details and services
             $owner_data = GarageUser::where('garage_id', $request->garage_id)->where('is_owner', true)->first();
             $owner = User::findOrFail($owner_data->user_id);
             Mail::to($owner->email)->send(new ServiceMail($owner, $user, $cars));
         }
-
         return ok('User created successfully!', $user->load('garages', 'service', 'cars'));
     }
 

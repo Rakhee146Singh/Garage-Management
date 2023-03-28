@@ -75,38 +75,32 @@ Route::prefix('v1')->group(function () {
             });
 
             Route::controller(GarageController::class)->prefix('garage')->group(function () {
-                Route::post('/', 'list')->middleware('services:admin|owner');
+                Route::post('/', 'list')->middleware('services:admin|owner|mechanic|customer');
                 Route::post('create', 'create')->middleware('services:owner|mechanic');
                 Route::get('show/{id}', 'show')->middleware('services:owner|mechanic');
                 Route::post('update/{id}', 'update')->middleware('services:owner|mechanic');
                 Route::post('delete/{id}', 'delete')->middleware('services:admin|owner|mechanic');
             });
 
-
-            Route::controller(CarController::class)->prefix('car')->group(function () {
-                Route::post('/', 'list')->middleware('services:admin|owner|mechanic|customer');
-                Route::post('create', 'create')->middleware('services:owner|mechanic|customer');
-                // Route::get('show/{id}', 'show')->middleware('services:owner|mechanic|customer');
-                // Route::post('update/{id}', 'update')->middleware('services:owner|mechanic|customer');
-                // Route::post('delete/{id}', 'delete')->middleware('services:owner|mechanic|customer');
-            });
-
             Route::controller(CarServiceController::class)->prefix('carservice')->group(function () {
-                Route::post('/', 'list')->middleware('services:admin|owner|mechanic');
-                Route::post('create', 'create')->middleware('services:owner|mechanic');
-                Route::get('show/{id}', 'show')->middleware('services:owner|mechanic');
-                Route::post('update/{id}', 'update')->middleware('services:owner|mechanic');
-                Route::post('delete/{id}', 'delete')->middleware('services:owner|mechanic');
                 Route::post('status/{id}', 'status')->middleware('services:owner|mechanic');
             });
 
             Route::controller(CarServiceJobController::class)->prefix('job')->group(function () {
-                Route::post('/', 'list')->middleware('services:admin|owner|mechanic');
                 Route::post('create', 'create')->middleware('services:owner|mechanic');
                 Route::get('show/{id}', 'show')->middleware('services:owner|mechanic');
                 Route::post('update/{id}', 'update')->middleware('services:owner|mechanic');
-                Route::post('delete/{id}', 'delete')->middleware('services:owner|mechanic');
                 Route::post('status/{id}', 'status')->middleware('services:owner|mechanic');
+            });
+        });
+
+        Route::group(['prefix' => 'customer'], function () {
+            Route::controller(CarController::class)->prefix('car')->group(function () {
+                Route::post('/', 'list')->middleware('services:admin|owner|mechanic|customer');
+                Route::post('create', 'create')->middleware('services:owner|mechanic|customer');
+                Route::get('show/{id}', 'show')->middleware('services:owner|mechanic|customer');
+                Route::post('update/{id}', 'update')->middleware('services:owner|mechanic|customer');
+                Route::post('delete/{id}', 'delete')->middleware('services:owner|mechanic|customer');
             });
         });
     });

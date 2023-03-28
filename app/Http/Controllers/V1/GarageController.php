@@ -20,14 +20,40 @@ class GarageController extends Controller
             'sortOrder'     => 'nullable|in:asc,desc',
             'sortField'     => 'nullable|string',
             'perPage'       => 'nullable|integer',
-            'currentPage'   => 'nullable|integer'
+            'currentPage'   => 'nullable|integer',
+            'city_id'       => 'nullable|exists:cities,id',
+            'state_id'      => 'nullable|exists:states,id',
+            'country_id'    => 'nullable|exists:countries,id',
         ]);
-        $query = Garage::query(); //query
+        $query = Garage::query()->with('cities')->first(); //query
+        if (auth()->user()->type == 'Owner') {
+            $query->whereHas('users', function ($query) {
+                $query->where('id', Auth()->id);
+            });
+        }
+
+        /* Filters */
+        if ($request->city_id) {
+            $query->whereHas('cities', function ($query) use ($request) {
+                $query->where('id', $request->city_id);
+            });
+        }
+        if ($request->state_id) {
+            $query->whereHas('cities.states', function ($query) use ($request) {
+                $query->where('id', $request->state_id);
+            });
+        }
+        if ($request->country_id) {
+            $query->whereHas('cities.states.countries', function ($query) use ($request) {
+                $query->where('id', $request->country_id);
+            });
+        }
 
         /* Searching */
         if (isset($request->search)) {
             $query = $query->where("name", "LIKE", "%{$request->search}%");
         }
+
         /* Sorting */
         if ($request->sortField || $request->sortOrder) {
             $query = $query->orderBy($request->sortField, $request->sortOrder);

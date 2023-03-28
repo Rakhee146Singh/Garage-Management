@@ -6,7 +6,6 @@ use Carbon\Carbon;
 use App\Models\User;
 use Illuminate\Support\Str;
 use Illuminate\Http\Request;
-use Illuminate\Mail\Message;
 use App\Models\ResetPassword;
 use App\Mail\ForgetPasswordMail;
 use App\Http\Controllers\Controller;

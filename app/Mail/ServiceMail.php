@@ -22,7 +22,6 @@ class ServiceMail extends Mailable
         $this->owner = $owner;
         $this->user = $user;
         $this->cars = $cars;
-        // $this->service = $service;
     }
 
     /**
