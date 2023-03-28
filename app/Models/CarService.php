@@ -17,7 +17,7 @@ class CarService extends BaseModel
      */
     public function cars()
     {
-        return $this->belongsTo(Car::class, 'car_id');
+        return $this->belongsTo(Car::class, 'car_id')->select('id', 'user_id', 'company_name', 'model_name', 'manufacturing_year');
     }
 
     /**
@@ -26,6 +26,6 @@ class CarService extends BaseModel
      */
     public function jobs()
     {
-        return $this->hasMany(CarServiceJob::class, 'car_service_id');
+        return $this->hasMany(CarServiceJob::class, 'car_service_id')->select('id', 'car_service_id', 'user_id', 'service_type_id', 'status');
     }
 }

@@ -9,47 +9,51 @@ use Illuminate\Mail\Mailables\Content;
 use Illuminate\Mail\Mailables\Envelope;
 use Illuminate\Queue\SerializesModels;
 
-class ServiceMail extends Mailable
+class ForgetPasswordMail extends Mailable
 {
     use Queueable, SerializesModels;
+    public $token;
 
-    public $owner, $user, $cars;
     /**
      * Create a new message instance.
+     *
+     * @return void
      */
-    public function __construct($owner, $user, $cars)
+    public function __construct($token)
     {
-        $this->owner = $owner;
-        $this->user = $user;
-        $this->cars = $cars;
+        $this->token = $token;
     }
 
     /**
      * Get the message envelope.
+     *
+     * @return \Illuminate\Mail\Mailables\Envelope
      */
-    public function envelope(): Envelope
+    public function envelope()
     {
         return new Envelope(
-            subject: 'Service Mail',
+            subject: 'Forget Password Mail',
         );
     }
 
     /**
      * Get the message content definition.
+     *
+     * @return \Illuminate\Mail\Mailables\Content
      */
-    public function content(): Content
+    public function content()
     {
         return new Content(
-            markdown: 'emails.service',
+            view: 'emails.resetPassword',
         );
     }
 
     /**
      * Get the attachments for the message.
      *
-     * @return array<int, \Illuminate\Mail\Mailables\Attachment>
+     * @return array
      */
-    public function attachments(): array
+    public function attachments()
     {
         return [];
     }

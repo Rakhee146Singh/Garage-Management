@@ -17,7 +17,7 @@ class State extends Model
      */
     public function countries()
     {
-        return $this->belongsTo(Country::class, 'country_id');
+        return $this->belongsTo(Country::class, 'country_id')->select('id', 'name');
     }
 
     /**
@@ -26,6 +26,6 @@ class State extends Model
      */
     public function cities()
     {
-        return $this->hasMany(City::class, 'state_id');
+        return $this->hasMany(City::class, 'state_id')->select('id', 'state_id', 'name');
     }
 }

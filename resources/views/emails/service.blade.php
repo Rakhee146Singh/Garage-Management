@@ -39,32 +39,22 @@ Thanks,<br>
         <h5>Car Details</h5>
         <table border="1">
             <thead>
+                <th>Service Name</th>
                 <th>Company Name</th>
                 <th>Model Name</th>
                 <th>Manufacturing Year</th>
             </thead>
             @foreach ($cars as $car)
-                <tr>
-                    <td>{{ $car->company_name }}</td>
-                    <td>{{ $car->model_name }}</td>
-                    <td>{{ $car->manufacturing_year }}</td>
-                </tr>
+                @foreach ($car->types as $service)
+                    <tr>
+                        <td>{{ $service->name }}</td>
+                        <td>{{ $car->company_name }}</td>
+                        <td>{{ $car->model_name }}</td>
+                        <td>{{ $car->manufacturing_year }}</td>
+                    </tr>
+                @endforeach
             @endforeach
         </table>
-        <br>
-        <br>
-        <h5>Service Type Details</h5>
-        <table border="1">
-            <thead>
-                <th>Service Type</th>
-            </thead>
-            @foreach ($user->service as $services)
-                <tr>
-                    <td>{{ $services->name }}</td>
-                </tr>
-            @endforeach
-        </table>
-        <p class="signature">Mailtrap</p>
         <div>
 </body>
 

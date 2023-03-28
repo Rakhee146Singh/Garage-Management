@@ -5,49 +5,50 @@ namespace App\Http\Controllers\V1;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
 use App\Models\CarServiceJob;
+use App\Notifications\ServiceNotification;
 
 class CarServiceJobController extends Controller
 {
-    /**
-     * API of listing Car Service Job data.
-     *
-     * @return json $jobs
-     */
-    public function list(Request $request)
-    {
-        $request->validate([
-            'search'        => 'nullable|string',
-            'sortOrder'     => 'nullable|in:asc,desc',
-            'sortField'     => 'nullable|string',
-            'perPage'       => 'nullable|integer',
-            'currentPage'   => 'nullable|integer'
-        ]);
-        $query = CarServiceJob::query(); //query
+    // /**
+    //  * API of listing Car Service Job data.
+    //  *
+    //  * @return json $jobs
+    //  */
+    // public function list(Request $request)
+    // {
+    //     $request->validate([
+    //         'search'        => 'nullable|string',
+    //         'sortOrder'     => 'nullable|in:asc,desc',
+    //         'sortField'     => 'nullable|string',
+    //         'perPage'       => 'nullable|integer',
+    //         'currentPage'   => 'nullable|integer'
+    //     ]);
+    //     $query = CarServiceJob::query(); //query
 
-        /* Searching */
-        if (isset($request->search)) {
-            $query = $query->where("service_type_id", "LIKE", "%{$request->search}%");
-        }
-        /* Sorting */
-        if ($request->sortField || $request->sortOrder) {
-            $query = $query->orderBy($request->sortField, $request->sortOrder);
-        }
+    //     /* Searching */
+    //     if (isset($request->search)) {
+    //         $query = $query->where("service_type_id", "LIKE", "%{$request->search}%");
+    //     }
+    //     /* Sorting */
+    //     if ($request->sortField || $request->sortOrder) {
+    //         $query = $query->orderBy($request->sortField, $request->sortOrder);
+    //     }
 
-        /* Pagination */
-        $count = $query->count();
-        if ($request->perPage && $request->currentPage) {
-            $perPage        = $request->perPage;
-            $currentPage    = $request->currentPage;
-            $query          = $query->skip($perPage * ($currentPage - 1))->take($perPage);
-        }
-        /* Get records */
-        $jobs  = $query->get();
-        $data       = [
-            'count' => $count,
-            'jobs'  => $jobs
-        ];
-        return ok('Car Service Job list', $data);
-    }
+    //     /* Pagination */
+    //     $count = $query->count();
+    //     if ($request->perPage && $request->currentPage) {
+    //         $perPage        = $request->perPage;
+    //         $currentPage    = $request->currentPage;
+    //         $query          = $query->skip($perPage * ($currentPage - 1))->take($perPage);
+    //     }
+    //     /* Get records */
+    //     $jobs  = $query->get();
+    //     $data       = [
+    //         'count' => $count,
+    //         'jobs'  => $jobs
+    //     ];
+    //     return ok('Car Service Job list', $data);
+    // }
 
     /**
      * API of new create Car Service Job.
@@ -63,6 +64,7 @@ class CarServiceJobController extends Controller
             'service_type_id'       => 'required|exists:service_types,id',
         ]);
         $job = CarServiceJob::create($request->only('car_service_id', 'user_id', 'service_type_id'));
+        $job->users->notify(new ServiceNotification($job));
         return ok('Car Service Job created successfully!', $job);
     }
 
@@ -93,19 +95,8 @@ class CarServiceJobController extends Controller
         ]);
         $job = CarServiceJob::findOrFail($id);
         $job->update($request->only('car_service_id', 'user_id', 'service_type_id'));
+        $job->users->notify(new ServiceNotification($job));
         return ok('Car Service Job updated successfully!', $job);
-    }
-
-    /**
-     * API of Delete Car Service Job data.
-     *
-     * @param  \App\CarServiceJob  $id
-     * @return json
-     */
-    public function delete($id)
-    {
-        CarServiceJob::findOrFail($id)->delete();
-        return ok('Car Service deleted successfully');
     }
 
     /**
@@ -120,7 +111,7 @@ class CarServiceJobController extends Controller
             'status'          => 'required|in:In-Progress,Complete',
         ]);
 
-        $job = CarServiceJob::with('services')->findOrFail($id);
+        $job = CarServiceJob::findOrFail($id);
         $job->update($request->only('status'));
 
         if ($request->status == 'In-Progress' || $request->status == 'Complete') {
