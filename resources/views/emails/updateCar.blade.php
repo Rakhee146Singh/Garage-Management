@@ -22,13 +22,13 @@
     <div>
         <p>Hey {{ $owner->first_name }},</p>
         <p>Myself {{ $user->first_name }} </p>
-        <p>I want to get my Car Service</p>
-        <p>My Car Service ID:
+        <p>I have Updated My Car Service</p>
+        <p>My Updated Car Service ID:
             @foreach ($services as $service)
                 {{ $service->id }} &nbsp;,&nbsp;
             @endforeach
         </p>
-        <h5>Car Details</h5>
+        <h5>Updated Car Details</h5>
         <table border="1">
             <thead>
                 <th>Service Name</th>

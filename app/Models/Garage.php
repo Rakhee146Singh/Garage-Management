@@ -38,11 +38,11 @@ class Garage extends BaseModel
      */
     public function users()
     {
-        return $this->belongsToMany(User::class, 'garage_users', 'garage_id', 'user_id')->withPivot('is_owner')->select('id', 'city_id', 'first_name', 'email', 'address1', 'phone', 'profile_picture');
+        return $this->belongsToMany(User::class, 'garage_users', 'garage_id', 'user_id')->withPivot('is_owner')->select('id', 'city_id', 'first_name', 'email', 'type', 'address1', 'phone', 'profile_picture');
     }
 
     /**
-     *  function for State hasMany Cities
+     *  function for Garage belongsTo Cities
      *
      */
     public function cities()

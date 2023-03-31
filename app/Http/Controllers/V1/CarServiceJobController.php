@@ -2,54 +2,16 @@
 
 namespace App\Http\Controllers\V1;
 
+use App\Models\User;
 use Illuminate\Http\Request;
-use App\Http\Controllers\Controller;
 use App\Models\CarServiceJob;
-use App\Notifications\ServiceNotification;
+use App\Mail\MechanicServiceMail;
+use App\Http\Controllers\Controller;
+use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Mail;
 
 class CarServiceJobController extends Controller
 {
-    // /**
-    //  * API of listing Car Service Job data.
-    //  *
-    //  * @return json $jobs
-    //  */
-    // public function list(Request $request)
-    // {
-    //     $request->validate([
-    //         'search'        => 'nullable|string',
-    //         'sortOrder'     => 'nullable|in:asc,desc',
-    //         'sortField'     => 'nullable|string',
-    //         'perPage'       => 'nullable|integer',
-    //         'currentPage'   => 'nullable|integer'
-    //     ]);
-    //     $query = CarServiceJob::query(); //query
-
-    //     /* Searching */
-    //     if (isset($request->search)) {
-    //         $query = $query->where("service_type_id", "LIKE", "%{$request->search}%");
-    //     }
-    //     /* Sorting */
-    //     if ($request->sortField || $request->sortOrder) {
-    //         $query = $query->orderBy($request->sortField, $request->sortOrder);
-    //     }
-
-    //     /* Pagination */
-    //     $count = $query->count();
-    //     if ($request->perPage && $request->currentPage) {
-    //         $perPage        = $request->perPage;
-    //         $currentPage    = $request->currentPage;
-    //         $query          = $query->skip($perPage * ($currentPage - 1))->take($perPage);
-    //     }
-    //     /* Get records */
-    //     $jobs  = $query->get();
-    //     $data       = [
-    //         'count' => $count,
-    //         'jobs'  => $jobs
-    //     ];
-    //     return ok('Car Service Job list', $data);
-    // }
-
     /**
      * API of new create Car Service Job.
      *
@@ -58,13 +20,23 @@ class CarServiceJobController extends Controller
      */
     public function create(Request $request)
     {
-        $request->validate([
-            'car_service_id'        => 'required|exists:car_services,id',
-            'user_id'               => 'required|exists:users,id',
-            'service_type_id'       => 'required|exists:service_types,id',
-        ]);
-        $job = CarServiceJob::create($request->only('car_service_id', 'user_id', 'service_type_id'));
-        $job->users->notify(new ServiceNotification($job));
+        $request->validate(
+            [
+                'car_service_id'        => 'required|exists:car_services,id',
+                'user_id'               => 'required|exists:users,id',
+                'service_type_id'       => 'required|exists:service_types,id',
+            ]
+        );
+
+        $user = User::findOrFail($request->user_id);
+        $job = CarServiceJob::create(
+            $request->only(
+                'car_service_id',
+                'user_id',
+                'service_type_id'
+            )
+        );
+        Mail::to($user->email)->send(new MechanicServiceMail($job));
         return ok('Car Service Job created successfully!', $job);
     }
 
@@ -88,14 +60,24 @@ class CarServiceJobController extends Controller
      */
     public function update(Request $request, $id)
     {
-        $request->validate([
-            'car_service_id'        => 'required|exists:car_services,id',
-            'user_id'               => 'required|exists:users,id',
-            'service_type_id'       => 'required|exists:service_types,id',
-        ]);
+        $request->validate(
+            [
+                'car_service_id'        => 'required|exists:car_services,id',
+                'user_id'               => 'required|exists:users,id',
+                'service_type_id'       => 'required|exists:service_types,id',
+            ]
+        );
         $job = CarServiceJob::findOrFail($id);
-        $job->update($request->only('car_service_id', 'user_id', 'service_type_id'));
-        $job->users->notify(new ServiceNotification($job));
+        $user = User::findOrFail($request->user_id);
+
+        $job->update(
+            $request->only(
+                'car_service_id',
+                'user_id',
+                'service_type_id'
+            )
+        );
+        Mail::to($user->email)->send(new MechanicServiceMail($job));
         return ok('Car Service Job updated successfully!', $job);
     }
 
@@ -107,16 +89,21 @@ class CarServiceJobController extends Controller
      */
     public function status(Request $request, $id)
     {
-        $request->validate([
-            'status'          => 'required|in:In-Progress,Complete',
-        ]);
-
+        $request->validate(
+            [
+                'status'          => 'required|in:IP,C',
+            ]
+        );
         $job = CarServiceJob::findOrFail($id);
         $job->update($request->only('status'));
 
-        if ($request->status == 'In-Progress' || $request->status == 'Complete') {
-            $service = $job->services;
-            $service->update($request->only('status'));
+        if (Auth::id() == $job->user_id) {
+            if ($request->status == 'IP' || $request->status == 'C') {
+                $service = $job->services;
+                $service->update($request->only('status'));
+            }
+        } else {
+            return ok('User not valid');
         }
         return ok('Car Service status updated successfully', $job);
     }

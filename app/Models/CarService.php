@@ -9,7 +9,28 @@ class CarService extends BaseModel
 {
     use HasFactory;
 
-    protected $fillable = ['garage_id', 'car_id', 'status'];
+    protected $fillable = ['garage_id', 'car_id', 'service_type_id', 'status'];
+
+    /**
+     * Accessors
+     */
+    public function getStatusNameAttribute()
+    {
+        switch ($this->status) {
+            case 'I':
+                return 'Initiated';
+            case 'IP':
+                return 'In-Progress';
+            case 'DE':
+                return 'Delay';
+            case 'C':
+                return 'Completed';
+            case 'D':
+                return 'Delivered';
+            default:
+                return $this->status;
+        }
+    }
 
     /**
      *  function for CarService belongs to Cars

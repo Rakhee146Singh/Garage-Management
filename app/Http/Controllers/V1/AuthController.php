@@ -4,6 +4,9 @@ namespace App\Http\Controllers\V1;
 
 use Carbon\Carbon;
 use App\Models\User;
+use App\Mail\ServiceMail;
+use App\Models\CarService;
+use App\Models\GarageUser;
 use Illuminate\Support\Str;
 use Illuminate\Http\Request;
 use App\Models\ResetPassword;
@@ -15,6 +18,101 @@ use Illuminate\Support\Facades\Mail;
 class AuthController extends Controller
 {
     /**
+     * API for User(Owner,Mechanic,Customer) Registration.
+     *
+     * @param  \Illuminate\Http\Request  $request
+     * @return json $user
+     */
+    public function register(Request $request)
+    {
+        $request->validate(
+            [
+                'city_id'                       => 'required|exists:cities,id',
+                'garage_id'                     => 'required_if:type,mechanic,customer|exists:garages,id',
+                'service_type_id.*'             => 'required_if:type,mechanic,customer|exists:service_types,id',
+                'first_name'                    => 'required|alpha|max:30',
+                'last_name'                     => 'required|alpha|max:30',
+                'email'                         => 'required|email|unique:users',
+                'password'                      => 'required|string|max:8',
+                'type'                          => 'required|in:mechanic,customer,owner',
+                'billable_name'                 => 'nullable|string',
+                'address1'                      => 'required|string|max:100',
+                'address2'                      => 'required|string|max:100',
+                'zipcode'                       => 'required|integer|min:6',
+                'phone'                         => 'required|unique:users|integer|min:10',
+                'profile_picture'               => 'required|mimes:jpg,jpeg,png,pdf',
+                'company_name'                  => 'required_if:type,customer|alpha|max:20',
+                'model_name'                    => 'required_if:type,customer|string|max:20',
+                'manufacturing_year'            => 'required_if:type,customer|date_format:Y',
+            ]
+        );
+        $request['password'] = Hash::make($request->password);
+        $imageName = str_replace(".", "", (string)microtime(true)) . '.' . $request->profile_picture->getClientOriginalExtension();
+        $request->profile_picture->storeAs("public/profiles", $imageName);
+
+        $billable_name = $request->first_name . " " . $request->last_name;
+        $user = User::create(
+            $request->only(
+                'city_id',
+                'first_name',
+                'last_name',
+                'email',
+                'password',
+                'type',
+                'address1',
+                'address2',
+                'zipcode',
+                'phone'
+            ) +
+                [
+                    'billable_name' => $billable_name
+                ] +
+                [
+                    'profile_picture' => $imageName
+                ]
+        );
+
+        /** Insert data in pivot table for customer and mechanic */
+        if ($user->type != 'owner') {
+            $user->service()->syncWithoutDetaching($request->service_type_id);
+            $user->garages()->attach([$request->garage_id => ['is_owner' => false]]);
+        }
+
+        /** Insert car and service type detail when Customer register with pivot table insertion */
+        if ($user->type == 'customer') {
+            $car = $user->cars()->create(
+                $request->only(
+                    'company_name',
+                    'model_name',
+                    'manufacturing_year'
+                )
+            );
+            $car->types()->attach($request->service_type_id);
+
+            /** Insertion in Car Service Table with Car Details */
+            $services = [];
+            foreach ($request->service_type_id as $service_id) {
+                $service = CarService::create(
+                    [
+                        'garage_id' => $request->garage_id,
+                        'car_id' => $car->id
+                    ],
+                    [
+                        'service_type_id' => $service_id
+                    ]
+                );
+                array_push($services, $service);
+            }
+
+            /** Sending mail to Garage owner with Customer Car details and Car Service Id*/
+            $owner_data = GarageUser::where('garage_id', $request->garage_id)->where('is_owner', true)->first();
+            $owner = User::findOrFail($owner_data->user_id);
+            Mail::to($owner->email)->send(new ServiceMail($owner, $user, $car, $services));
+        }
+        return ok('User registered successfully!', $user);
+    }
+
+    /**
      * API of User login
      *
      * @param  \Illuminate\Http\Request  $request
@@ -23,8 +121,8 @@ class AuthController extends Controller
     public function login(Request $request)
     {
         $request->validate([
-            'email'    => 'required|email',
-            'password' => 'required',
+            'email'    => 'required|email|exists:users',
+            'password' => 'required|string|max:8',
         ]);
 
         $user = User::where('email', $request->email)->first();

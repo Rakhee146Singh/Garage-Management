@@ -2,9 +2,11 @@
 
 namespace App\Http\Controllers\V1;
 
+use App\Models\User;
 use App\Models\Garage;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
+use Illuminate\Support\Facades\Auth;
 
 class GarageController extends Controller
 {
@@ -15,21 +17,22 @@ class GarageController extends Controller
      */
     public function list(Request $request)
     {
-        $request->validate([
-            'search'        => 'nullable|string',
-            'sortOrder'     => 'nullable|in:asc,desc',
-            'sortField'     => 'nullable|string',
-            'perPage'       => 'nullable|integer',
-            'currentPage'   => 'nullable|integer',
-            'city_id'       => 'nullable|exists:cities,id',
-            'state_id'      => 'nullable|exists:states,id',
-            'country_id'    => 'nullable|exists:countries,id',
-        ]);
-        $query = Garage::query()->with('cities')->first(); //query
-        if (auth()->user()->type == 'Owner') {
-            $query->whereHas('users', function ($query) {
-                $query->where('id', Auth()->id);
-            });
+        $request->validate(
+            [
+                'search'        => 'nullable|string',
+                'sortOrder'     => 'nullable|in:asc,desc',
+                'sortField'     => 'nullable|string',
+                'perPage'       => 'nullable|integer',
+                'currentPage'   => 'nullable|integer',
+                'city_id'       => 'nullable|exists:cities,id',
+                'state_id'      => 'nullable|exists:states,id',
+                'country_id'    => 'nullable|exists:countries,id',
+            ]
+        );
+        $query = Garage::query(); //query
+
+        if (auth()->user()->type == 'owner') {
+            $query = Garage::query()->with('users.service');
         }
 
         /* Filters */
@@ -67,10 +70,9 @@ class GarageController extends Controller
             $query          = $query->skip($perPage * ($currentPage - 1))->take($perPage);
         }
         /* Get records */
-        $garages  = $query->get();
-        $data       = [
+        $data           = [
             'count'     => $count,
-            'garages'   => $garages
+            'garages'   => $query->get()
         ];
         return ok('Garage list', $data);
     }
@@ -83,24 +85,42 @@ class GarageController extends Controller
      */
     public function create(Request $request)
     {
-        $request->validate([
-            'city_id'                       => 'required|exists:cities,id',
-            'state_id'                      => 'required|exists:states,id',
-            'country_id'                    => 'required|exists:countries,id',
-            'name'                          => 'required|string|max:30',
-            'address1'                      => 'required|string|max:50',
-            'address2'                      => 'required|string|max:50',
-            'zipcode'                       => 'required|integer|min:6',
-            'user_id'                       => 'required|exists:users,id',
-            'services.*'                    => 'required|array',
-            'services.*.service_type_id'    => 'required|integer'
-        ]);
-        $garage = Garage::create($request->only('city_id', 'state_id', 'country_id', 'name', 'address1', 'address2', 'zipcode', 'user_id'));
+        $request->validate(
+            [
+                'city_id'                       => 'required|exists:cities,id',
+                'state_id'                      => 'required|exists:states,id',
+                'country_id'                    => 'required|exists:countries,id',
+                'name'                          => 'required|string|max:30',
+                'address1'                      => 'required|string|max:50',
+                'address2'                      => 'required|string|max:50',
+                'zipcode'                       => 'required|integer|min:6',
+                'user_id'                       => 'required_if:type,owner|exists:users,id',
+                'services.*'                    => 'required|array',
+                'services.*.service_type_id'    => 'required|integer|exists:service_types,id'
+            ]
+        );
 
-        //enter data in pivot table
-        $garage->users()->attach([$request->user_id => ['is_owner' => true]]);
-        $garage->services()->attach($request->services);
-        return ok('Garage created successfully!', $garage->load('users', 'services'));
+        $user = User::findOrFail($request->user_id);
+        if ($user->type == "owner") {
+            $garage = Garage::create(
+                $request->only(
+                    'city_id',
+                    'state_id',
+                    'country_id',
+                    'name',
+                    'address1',
+                    'address2',
+                    'zipcode',
+                    'user_id'
+                )
+            );
+
+            //enter data in pivot table
+            $garage->users()->attach([$request->user_id => ['is_owner' => true]]);
+            $garage->services()->attach($request->services);
+            return ok('Garage created successfully!', $garage->load('users', 'services'));
+        }
+        return ok('Garage cannot be created. Invalid User Type');
     }
 
     /**
@@ -123,20 +143,33 @@ class GarageController extends Controller
      */
     public function update(Request $request, $id)
     {
-        $request->validate([
-            'city_id'                       => 'required|exists:cities,id',
-            'state_id'                      => 'required|exists:states,id',
-            'country_id'                    => 'required|exists:countries,id',
-            'name'                          => 'required|string|max:30',
-            'address1'                      => 'required|string|max:50',
-            'address2'                      => 'required|string|max:50',
-            'zipcode'                       => 'required|integer|min:6',
-            'user_id'                       => 'required|exists:users,id',
-            'services.*'                    => 'required|array',
-            'services.*.service_type_id'    => 'required|integer'
-        ]);
+        $request->validate(
+            [
+                'city_id'                       => 'required|exists:cities,id',
+                'state_id'                      => 'required|exists:states,id',
+                'country_id'                    => 'required|exists:countries,id',
+                'name'                          => 'required|string|max:30',
+                'address1'                      => 'required|string|max:50',
+                'address2'                      => 'required|string|max:50',
+                'zipcode'                       => 'required|integer|min:6',
+                'user_id'                       => 'required_if:type,owner|exists:users,id',
+                'services.*'                    => 'required|array',
+                'services.*.service_type_id'    => 'required|integer|exists:service_types,id'
+            ]
+        );
         $garage = Garage::findOrFail($id);
-        $garage->update($request->only('city_id', 'state_id', 'country_id', 'name', 'address1', 'address2', 'zipcode', 'user_id'));
+        $garage->update(
+            $request->only(
+                'city_id',
+                'state_id',
+                'country_id',
+                'name',
+                'address1',
+                'address2',
+                'zipcode',
+                'user_id'
+            )
+        );
 
         //enter data in pivot table
         $garage->users()->sync([$request->user_id => ['is_owner' => true]]);

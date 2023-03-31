@@ -15,13 +15,15 @@ class ServiceTypeController extends Controller
      */
     public function list(Request $request)
     {
-        $request->validate([
-            'search'        => 'nullable|string',
-            'sortOrder'     => 'nullable|in:asc,desc',
-            'sortField'     => 'nullable|string',
-            'perPage'       => 'nullable|integer',
-            'currentPage'   => 'nullable|integer'
-        ]);
+        $request->validate(
+            [
+                'search'        => 'nullable|string',
+                'sortOrder'     => 'nullable|in:asc,desc',
+                'sortField'     => 'nullable|string',
+                'perPage'       => 'nullable|integer',
+                'currentPage'   => 'nullable|integer'
+            ]
+        );
         $query = ServiceType::query(); //query
 
         /* Searching */
@@ -41,10 +43,9 @@ class ServiceTypeController extends Controller
             $query          = $query->skip($perPage * ($currentPage - 1))->take($perPage);
         }
         /* Get records */
-        $services   = $query->get();
-        $data       = [
+        $data           = [
             'count'     => $count,
-            'services'  => $services
+            'services'  => $query->get()
         ];
         return ok('Service Type list', $data);
     }
@@ -57,9 +58,11 @@ class ServiceTypeController extends Controller
      */
     public function create(Request $request)
     {
-        $request->validate([
-            'name'         => 'required|alpha|max:30',
-        ]);
+        $request->validate(
+            [
+                'name'         => 'required|alpha|max:30',
+            ]
+        );
         $service = ServiceType::create($request->only('name'));
         return ok('Service Type created successfully!', $service);
     }
@@ -85,9 +88,11 @@ class ServiceTypeController extends Controller
     public function update(Request $request, $id)
     {
         $service = ServiceType::findOrFail($id);
-        $request->validate([
-            'name'         => 'required|alpha|max:30',
-        ]);
+        $request->validate(
+            [
+                'name'         => 'required|alpha|max:30',
+            ]
+        );
         $service->update($request->only('name'));
         return ok('Service Type updated successfully!', $service);
     }

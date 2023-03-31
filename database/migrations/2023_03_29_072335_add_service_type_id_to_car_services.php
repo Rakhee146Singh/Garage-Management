@@ -11,9 +11,10 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('service_types', function (Blueprint $table) {
-            $table->id();
-            $table->string('name');
+        Schema::table('car_services', function (Blueprint $table) {
+            $table->unsignedBigInteger('service_type_id')->after('car_id')->nullable();
+
+            $table->foreign('service_type_id')->references('id')->on('service_types')->onDelete('cascade');
         });
     }
 
@@ -22,6 +23,8 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('service_types');
+        Schema::table('car_services', function (Blueprint $table) {
+            //
+        });
     }
 };

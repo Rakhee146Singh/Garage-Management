@@ -9,20 +9,16 @@ use Illuminate\Mail\Mailables\Content;
 use Illuminate\Mail\Mailables\Envelope;
 use Illuminate\Queue\SerializesModels;
 
-class ServiceMail extends Mailable
+class MechanicServiceMail extends Mailable
 {
     use Queueable, SerializesModels;
-
-    public $owner, $user, $car, $services;
+    public $job;
     /**
      * Create a new message instance.
      */
-    public function __construct($owner, $user, $car, $services)
+    public function __construct($job)
     {
-        $this->owner = $owner;
-        $this->user = $user;
-        $this->car = $car;
-        $this->services = $services;
+        $this->job = $job;
     }
 
     /**
@@ -31,7 +27,7 @@ class ServiceMail extends Mailable
     public function envelope(): Envelope
     {
         return new Envelope(
-            subject: 'Service Mail',
+            subject: 'Mechanic Service Mail',
         );
     }
 
@@ -41,7 +37,7 @@ class ServiceMail extends Mailable
     public function content(): Content
     {
         return new Content(
-            markdown: 'emails.service',
+            view: 'emails.mechanic',
         );
     }
 

@@ -12,6 +12,23 @@ class CarServiceJob extends BaseModel
     protected $fillable = ['car_service_id', 'user_id', 'service_type_id', 'status'];
 
     /**
+     * Accessors
+     */
+    public function getStatusNameAttribute()
+    {
+        switch ($this->status) {
+            case 'P':
+                return 'Pending';
+            case 'IP':
+                return 'In-Progress';
+            case 'C':
+                return 'Completed';
+            default:
+                return $this->status;
+        }
+    }
+
+    /**
      *  function for CarServiceJob belongs to CarService
      *
      */
@@ -27,5 +44,14 @@ class CarServiceJob extends BaseModel
     public function users()
     {
         return $this->belongsTo(User::class, 'user_id')->select('id', 'first_name', 'email', 'phone');
+    }
+
+    /**
+     *  function for CarServiceJob belongs to ServiceType
+     *
+     */
+    public function serviceType()
+    {
+        return $this->belongsTo(ServiceType::class, 'service_type_id');
     }
 }
