@@ -26,10 +26,5 @@ class ServiceAccess
         if (!$flag) {
             return response()->json(['Not Acccess']);
         }
-        // if (auth()->user()->type == 'admin') {
-        //     return $next($request);
-        // } else {
-        //     return 'Not Access';
-        // }
     }
 }

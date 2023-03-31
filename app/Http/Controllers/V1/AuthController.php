@@ -48,8 +48,11 @@ class AuthController extends Controller
             ]
         );
         $request['password'] = Hash::make($request->password);
-        $imageName = str_replace(".", "", (string)microtime(true)) . '.' . $request->profile_picture->getClientOriginalExtension();
-        $request->profile_picture->storeAs("public/profiles", $imageName);
+
+        if ($request->hasFile('profile_picture')) {
+            $imageName = str_replace(".", "", (string)microtime(true)) . '.' . $request->profile_picture->getClientOriginalExtension();
+            $request->profile_picture->storeAs("public/profiles", $imageName);
+        }
 
         $billable_name = $request->first_name . " " . $request->last_name;
         $user = User::create(
@@ -107,7 +110,7 @@ class AuthController extends Controller
 
             /** Sending mail to Garage owner with Customer Car details and Car Service Id*/
             $owner_data = GarageUser::where('garage_id', $request->garage_id)->where('is_owner', true)->first();
-            $owner = User::findOrFail($owner_data->user_id);
+            $owner      = User::findOrFail($owner_data->user_id);
             Mail::to($owner->email)->send(new ServiceMail($owner, $user, $car, $services));
         }
         return ok('User registered successfully!', $user);
@@ -128,18 +131,18 @@ class AuthController extends Controller
 
         $user = User::where('email', $request->email)->first();
         if (!$user) {
-            return error("User with this email is not found!");
+            return error("User with this email is not found!", [], 'notfound');
         }
         if ($user && Hash::check($request->password, $user->password)) {
             $token = $user->createToken($request->email)->plainTextToken;
 
-            $data = [
+            $data       = [
                 'token' => $token,
                 'user'  => $user
             ];
             return ok('User Logged in Succesfully', $data);
         } else {
-            return error("Password is incorrect");
+            return error("Password is incorrect", [], 'validation');
         }
     }
 
@@ -159,7 +162,7 @@ class AuthController extends Controller
      *
      * @param  \Illuminate\Http\Request  $request
      */
-    public function change_password(Request $request)
+    public function changePassword(Request $request)
     {
         $request->validate([
             'old_password' => 'required|max:8',
@@ -168,12 +171,12 @@ class AuthController extends Controller
 
         //Match The Old Password
         if (!Hash::check($request->old_password, auth()->user()->password)) {
-            return error("Old Password Doesn't match!");
+            return error("Old Password Doesn't match!", [], 'forbidden');
         }
 
         //Old Password and New Password cannot be same
         if ($request->old_password == $request->new_password) {
-            return error("Password cannot be same as old password!");
+            return error("Password cannot be same as old password!", [], 'validation');
         }
 
         //Update the new Password
@@ -188,7 +191,7 @@ class AuthController extends Controller
      *
      * @param  \Illuminate\Http\Request  $request
      */
-    public function send_reset_password_email(Request $request)
+    public function resetMail(Request $request)
     {
         $request->validate([
             'email'         => 'required|email',
@@ -228,7 +231,7 @@ class AuthController extends Controller
         ]);
         $resetpassword = ResetPassword::where('token', $token)->first();
         if (!$resetpassword) {
-            return error('Token is Invalid or expired');
+            return error('Token is Invalid or expired', [], 'unauthenticated');
         }
 
         $user = User::where('email', $resetpassword->email)->first();
@@ -284,7 +287,7 @@ class AuthController extends Controller
         }
 
         /* Sorting */
-        if ($request->sortField || $request->sortOrder) {
+        if ($request->sortField && $request->sortOrder) {
             $query = $query->orderBy($request->sortField, $request->sortOrder);
         }
 

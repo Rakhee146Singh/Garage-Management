@@ -31,7 +31,7 @@ class GarageController extends Controller
         );
 
         if (auth()->user()->type == 'owner') {
-            $query = Garage::query()->with('users.service');
+            $query = Garage::query()->with('users.service', 'users.cars.types', 'services');
         }
 
         /* Searching */
@@ -40,7 +40,7 @@ class GarageController extends Controller
         }
 
         /* Sorting */
-        if ($request->sortField || $request->sortOrder) {
+        if ($request->sortField && $request->sortOrder) {
             $query = $query->orderBy($request->sortField, $request->sortOrder);
         }
 
@@ -108,13 +108,13 @@ class GarageController extends Controller
     /**
      * API to get Garage with $id.
      *
-     * @param  \App\Country  $id
+     * @param  \App\Country
      * @return json $garage
      */
     public function show($id)
     {
-        $country = Garage::with('users', 'services')->findOrFail($id);
-        return ok('Country retrieved successfully', $country);
+        $garage = Garage::with('users', 'services')->findOrFail($id);
+        return ok('Garage retrieved successfully', $garage);
     }
 
     /**
@@ -169,6 +169,7 @@ class GarageController extends Controller
     {
         $garage = Garage::findOrFail($id);
         $garage->users()->delete();
+        $garage->delete();
         return ok('Garage deleted successfully');
     }
 }
