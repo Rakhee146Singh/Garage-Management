@@ -29,27 +29,9 @@ class GarageController extends Controller
                 'country_id'    => 'nullable|exists:countries,id',
             ]
         );
-        $query = Garage::query(); //query
 
         if (auth()->user()->type == 'owner') {
             $query = Garage::query()->with('users.service');
-        }
-
-        /* Filters */
-        if ($request->city_id) {
-            $query->whereHas('cities', function ($query) use ($request) {
-                $query->where('id', $request->city_id);
-            });
-        }
-        if ($request->state_id) {
-            $query->whereHas('cities.states', function ($query) use ($request) {
-                $query->where('id', $request->state_id);
-            });
-        }
-        if ($request->country_id) {
-            $query->whereHas('cities.states.countries', function ($query) use ($request) {
-                $query->where('id', $request->country_id);
-            });
         }
 
         /* Searching */

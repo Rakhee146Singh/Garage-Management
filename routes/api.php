@@ -25,9 +25,10 @@ use App\Http\Controllers\V1\CarServiceJobController;
 */
 
 Route::prefix('v1')->group(function () {
+    /** Open API */
     Route::post('login', [AuthController::class, 'login']);
     Route::post('register', [AuthController::class, 'register']);
-    Route::get('garage', [GarageController::class, 'list']);
+    Route::post('garage', [AuthController::class, 'list']);
     Route::post('reset-password-email', [AuthController::class, 'send_reset_password_email']);
     Route::post('reset-password/{token}', [AuthController::class, 'reset']);
 
