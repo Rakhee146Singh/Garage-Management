@@ -29,14 +29,15 @@ class UserController extends Controller
         $query = User::query(); //query
 
         if (auth()->user()->type == 'owner') {
-            $query = User::query()->with('garages.services.cars.users');
+            $query = $query->with('garages.services.cars.users')->where('id', Auth()->id());
         }
+
         /* Searching */
         if (isset($request->search)) {
             $query = $query->where("billable_name", "LIKE", "%{$request->search}%");
         }
         /* Sorting */
-        if ($request->sortField || $request->sortOrder) {
+        if ($request->sortField && $request->sortOrder) {
             $query = $query->orderBy($request->sortField, $request->sortOrder);
         }
 
@@ -72,7 +73,7 @@ class UserController extends Controller
                 'last_name'           => 'required|alpha|max:30',
                 'email'               => 'required|email|unique:users',
                 'password'            => 'required|string|max:8',
-                'type'                => 'required|in:mechanic,customer',
+                'type'                => 'required|in:mechanic,customer,owner',
                 'billable_name'       => 'nullable|string',
                 'address1'            => 'required|string|max:100',
                 'address2'            => 'required|string|max:100',
@@ -82,37 +83,44 @@ class UserController extends Controller
             ]
         );
         $request['password'] = Hash::make($request->password);
-        $imageName = str_replace(".", "", (string)microtime(true)) . '.' . $request->profile_picture->getClientOriginalExtension();
-        $request->profile_picture->storeAs("public/profiles", $imageName);
+
+        if ($request->hasFile('profile_picture')) {
+            $imageName = str_replace(".", "", (string)microtime(true)) . '.' . $request->profile_picture->getClientOriginalExtension();
+            $request->profile_picture->storeAs("public/profiles", $imageName);
+        }
 
         $billable_name = $request->first_name . " " . $request->last_name;
-        $user = User::create(
-            $request->only(
-                'city_id',
-                'first_name',
-                'last_name',
-                'email',
-                'password',
-                'type',
-                'address1',
-                'address2',
-                'zipcode',
-                'phone'
-            ) +
-                [
-                    'billable_name' => $billable_name
-                ] +
-                [
-                    'profile_picture' => $imageName
-                ]
-        );
 
-        /** Insert data in pivot table for customer and mechanic */
-        if ($user->type != 'owner') {
-            $user->service()->syncWithoutDetaching($request->service_type_id);
-            $user->garages()->attach([$request->garage_id => ['is_owner' => false]]);
+        /** Check the user type could not create same type of users */
+        if ($request->type != Auth()->user()->type) {
+            $user = User::create(
+                $request->only(
+                    'city_id',
+                    'first_name',
+                    'last_name',
+                    'email',
+                    'password',
+                    'type',
+                    'address1',
+                    'address2',
+                    'zipcode',
+                    'phone'
+                ) +
+                    [
+                        'billable_name' => $billable_name
+                    ] +
+                    [
+                        'profile_picture' => $imageName
+                    ]
+            );
+            /** Insert data in pivot table for customer and mechanic */
+            if ($user->type != 'owner') {
+                $user->service()->syncWithoutDetaching($request->service_type_id);
+                $user->garages()->attach([$request->garage_id => ['is_owner' => false]]);
+            }
+            return ok('User registered successfully!', $user);
         }
-        return ok('User registered successfully!', $user);
+        return ok('User Not Valid');
     }
 
 
@@ -122,9 +130,9 @@ class UserController extends Controller
      * @param  \App\User  $id
      * @return json $user
      */
-    public function show($id)
+    public function show()
     {
-        $user = User::with('garages', 'service', 'cars')->findOrFail($id);
+        $user = User::with('garages')->findOrFail(auth()->id());
         return ok('User retrieved successfully', $user);
     }
 
@@ -143,7 +151,7 @@ class UserController extends Controller
                 'last_name'            => 'required|alpha|max:30',
                 'email'                => 'required|email',
                 'password'             => 'required|string|max:8',
-                'type'                 => 'required|in:mechanic,customer',
+                'type'                 => 'required|in:mechanic,customer,owner',
                 'billable_name'        => 'nullable|string|max:20',
                 'address1'             => 'required|string|max:100',
                 'address2'             => 'required|string|max:100',
@@ -158,7 +166,6 @@ class UserController extends Controller
         $billable_name = $request->first_name . " " . $request->last_name;
 
         $user = User::findOrFail($id);
-
         if ($user->profile_picture) {
             Storage::delete("public/profiles/" . $user->profile_picture);
             $imageName = str_replace(".", "", (string)microtime(true)) . '.' . $request->profile_picture->getClientOriginalExtension();
@@ -200,7 +207,6 @@ class UserController extends Controller
     {
         $user = User::findOrFail($id);
         $user->cars()->delete();
-        $user->service()->delete();
         $user->delete();
         return ok('User deleted successfully');
     }

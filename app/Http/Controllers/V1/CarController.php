@@ -36,7 +36,12 @@ class CarController extends Controller
 
         /** Listing Car details for customer */
         if (auth()->user()->type == 'customer') {
-            $query = Car::query()->with('carServices.jobs.users')->where('user_id', Auth::id());
+            $query = Car::query()->with('carServices.jobs.users');
+        }
+
+        /** Listing Car details for mechanic */
+        if (auth()->user()->type == 'mechanic') {
+            $query = Car::query()->with('carServices');
         }
 
         /* Searching */
@@ -44,7 +49,7 @@ class CarController extends Controller
             $query = $query->where("company_name", "LIKE", "%{$request->search}%");
         }
         /* Sorting */
-        if ($request->sortField || $request->sortOrder) {
+        if ($request->sortField && $request->sortOrder) {
             $query = $query->orderBy($request->sortField, $request->sortOrder);
         }
 
@@ -57,11 +62,10 @@ class CarController extends Controller
         }
 
         /* Get records */
-        $data       = [
+        return ok('Car list', [
             'count' => $count,
             'cars'  => $query->get()
-        ];
-        return ok('Car list', $data);
+        ]);
     }
 
     /**
@@ -74,11 +78,11 @@ class CarController extends Controller
     {
         $request->validate(
             [
-                'garage_id'                     => 'required_if:type,customer|exists:garages,id',
-                'company_name'                  => 'required_if:type,customer|alpha|max:20',
-                'model_name'                    => 'required_if:type,customer|string|max:20',
-                'manufacturing_year'            => 'required_if:type,customer|date_format:Y',
-                'service_type_id.*'             => 'required_if:type,customer',
+                'garage_id'                     => 'required|exists:garages,id',
+                'company_name'                  => 'required|alpha|max:20',
+                'model_name'                    => 'required|string|max:20',
+                'manufacturing_year'            => 'required|date_format:Y',
+                'service_type_id.*'             => 'required|exists:service_types,id',
             ]
         );
 
@@ -101,20 +105,20 @@ class CarController extends Controller
         foreach ($request->service_type_id as $service_id) {
             $service = CarService::create(
                 [
-                    'garage_id' => $request->garage_id,
-                    'car_id' => $car->id
+                    'garage_id'         => $request->garage_id,
+                    'car_id'            => $car->id
                 ],
                 [
-                    'service_type_id' => $service_id
+                    'service_type_id'   => $service_id
                 ]
             );
             array_push($services, $service);
         }
 
+        /** If car created by mechanic or customer send mail to Garage owner with Car Service Id */
         if (auth()->user()->type == 'mechanic' || auth()->user()->type == 'customer') {
-            /** Sending mail to Garage owner with Customer Car details and Car Service Id*/
             $owner_data = GarageUser::where('garage_id', $request->garage_id)->where('is_owner', true)->first();
-            $owner = User::findOrFail($owner_data->user_id);
+            $owner      = User::findOrFail($owner_data->user_id);
             Mail::to($owner->email)->send(new ServiceMail($owner, $user, $car, $services));
         }
         return ok('Car created successfully!', $car->load('carServices'));
@@ -142,7 +146,7 @@ class CarController extends Controller
     {
         $car = $request->validate(
             [
-                'garage_id'             => 'required_if:type,customer|exists:garages,id',
+                'garage_id'             => 'required|exists:garages,id',
                 'company_name'          => 'required|alpha|max:20',
                 'model_name'            => 'required|string|max:30',
                 'manufacturing_year'    => 'required|date_format:Y',
@@ -168,19 +172,21 @@ class CarController extends Controller
         foreach ($request->service_type_id as $service_id) {
             $service = $car->carServices()->updateOrCreate(
                 [
-                    'garage_id' => $request->garage_id,
-                    'car_id' => $car->id
+                    'garage_id'         => $request->garage_id,
+                    'car_id'            => $car->id
                 ],
                 [
-                    'service_type_id' => $service_id
+                    'service_type_id'   => $service_id
                 ]
             );
             array_push($services, $service);
         }
+
+        /** If car updated by mechanic or customer send mail to Garage owner with Updated Car Service Id */
         if (auth()->user()->type == 'mechanic' || auth()->user()->type == 'customer') {
-            $user = $car->users;
+            $user       = $car->users;
             $owner_data = GarageUser::where('garage_id', $request->garage_id)->where('is_owner', true)->first();
-            $owner = User::findOrFail($owner_data->user_id);
+            $owner      = User::findOrFail($owner_data->user_id);
             Mail::to($owner->email)->send(new UpdateCarMail($owner, $user, $car, $services));
         }
         return ok('Car Updated successfully!', $car->load('carServices'));

@@ -47,6 +47,6 @@ class Garage extends BaseModel
      */
     public function cities()
     {
-        return $this->belongsTo(City::class, 'state_id')->select('id', 'state_id', 'name');
+        return $this->belongsTo(City::class, 'city_id')->select('id', 'state_id', 'name');
     }
 }

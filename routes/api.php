@@ -29,12 +29,12 @@ Route::prefix('v1')->group(function () {
     Route::post('login', [AuthController::class, 'login']);
     Route::post('register', [AuthController::class, 'register']);
     Route::post('garage', [AuthController::class, 'list']);
-    Route::post('reset-password-email', [AuthController::class, 'send_reset_password_email']);
+    Route::post('reset-password-email', [AuthController::class, 'resetMail']);
     Route::post('reset-password/{token}', [AuthController::class, 'reset']);
 
     Route::middleware('auth:sanctum')->group(function () {
         Route::get('logout', [AuthController::class, 'logout']);
-        Route::post('change-password', [AuthController::class, 'change_password']);
+        Route::post('change-password', [AuthController::class, 'changePassword']);
 
         Route::group(['prefix' => 'admin', 'middleware' => 'services:admin'], function () {
             Route::controller(CountryController::class)->prefix('country')->group(function () {
@@ -99,7 +99,7 @@ Route::prefix('v1')->group(function () {
             Route::controller(UserController::class)->group(function () {
                 Route::post('/', 'list')->withoutMiddleware('services:customer|mechanic');
                 Route::post('create', 'create')->withoutMiddleware('services:customer|mechanic');
-                Route::get('show/{id}', 'show');
+                Route::get('show', 'show');
                 Route::post('update/{id}', 'update');
                 Route::post('delete/{id}', 'delete')->withoutMiddleware('services:customer|mechanic');
             });
