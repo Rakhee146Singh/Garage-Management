@@ -4,6 +4,7 @@ namespace App\Http\Controllers\V1;
 
 use Carbon\Carbon;
 use App\Models\User;
+use App\Models\Garage;
 use App\Mail\ServiceMail;
 use App\Models\CarService;
 use App\Models\GarageUser;
@@ -237,5 +238,68 @@ class AuthController extends Controller
         //Delete the token after resetting the password
         ResetPassword::where('email', $user->email)->delete();
         return ok('Password Reset Successfully');
+    }
+
+    /**
+     * API of listing Garage data.
+     *
+     * @return json $garages
+     */
+    public function list(Request $request)
+    {
+        $request->validate(
+            [
+                'search'        => 'nullable|string',
+                'sortOrder'     => 'nullable|in:asc,desc',
+                'sortField'     => 'nullable|string',
+                'perPage'       => 'nullable|integer',
+                'currentPage'   => 'nullable|integer',
+                'city_id'       => 'nullable|exists:cities,id',
+                'state_id'      => 'nullable|exists:states,id',
+                'country_id'    => 'nullable|exists:countries,id',
+            ]
+        );
+        $query = Garage::query()->with('services'); //query
+
+        /* Filters */
+        if ($request->city_id) {
+            $query->whereHas('cities', function ($query) use ($request) {
+                $query->where('id', $request->city_id);
+            });
+        }
+        if ($request->state_id) {
+            $query->whereHas('cities.states', function ($query) use ($request) {
+                $query->where('id', $request->state_id);
+            });
+        }
+        if ($request->country_id) {
+            $query->whereHas('cities.states.countries', function ($query) use ($request) {
+                $query->where('id', $request->country_id);
+            });
+        }
+
+        /* Searching */
+        if (isset($request->search)) {
+            $query = $query->where("name", "LIKE", "%{$request->search}%");
+        }
+
+        /* Sorting */
+        if ($request->sortField || $request->sortOrder) {
+            $query = $query->orderBy($request->sortField, $request->sortOrder);
+        }
+
+        /* Pagination */
+        $count = $query->count();
+        if ($request->perPage && $request->currentPage) {
+            $perPage        = $request->perPage;
+            $currentPage    = $request->currentPage;
+            $query          = $query->skip($perPage * ($currentPage - 1))->take($perPage);
+        }
+        /* Get records */
+        $data           = [
+            'count'     => $count,
+            'garages'   => $query->get()
+        ];
+        return ok('Garage list', $data);
     }
 }
