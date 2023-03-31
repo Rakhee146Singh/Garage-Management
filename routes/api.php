@@ -26,81 +26,89 @@ use App\Http\Controllers\V1\CarServiceJobController;
 
 Route::prefix('v1')->group(function () {
     Route::post('login', [AuthController::class, 'login']);
+    Route::post('register', [AuthController::class, 'register']);
+    Route::get('garage', [GarageController::class, 'list']);
     Route::post('reset-password-email', [AuthController::class, 'send_reset_password_email']);
     Route::post('reset-password/{token}', [AuthController::class, 'reset']);
+
     Route::middleware('auth:sanctum')->group(function () {
         Route::get('logout', [AuthController::class, 'logout']);
         Route::post('change-password', [AuthController::class, 'change_password']);
 
-        Route::group(['prefix' => 'admin'], function () {
+        Route::group(['prefix' => 'admin', 'middleware' => 'services:admin'], function () {
             Route::controller(CountryController::class)->prefix('country')->group(function () {
-                Route::post('/', 'list')->middleware('services:admin');
-                Route::post('create', 'create')->middleware('services:admin');
-                Route::get('show/{id}', 'show')->middleware('services:admin');
-                Route::post('update/{id}', 'update')->middleware('services:admin');
-                Route::post('delete/{id}', 'delete')->middleware('services:admin');
+                Route::post('/', 'list');
+                Route::post('create', 'create');
+                Route::get('show/{id}', 'show');
+                Route::post('update/{id}', 'update');
+                Route::post('delete/{id}', 'delete');
             });
 
             Route::controller(StateController::class)->prefix('state')->group(function () {
-                Route::post('/', 'list')->middleware('services:admin');
-                Route::post('create', 'create')->middleware('services:admin');
-                Route::get('show/{id}', 'show')->middleware('services:admin');
-                Route::post('update/{id}', 'update')->middleware('services:admin');
-                Route::post('delete/{id}', 'delete')->middleware('services:admin');
+                Route::post('/', 'list');
+                Route::post('create', 'create');
+                Route::get('show/{id}', 'show');
+                Route::post('update/{id}', 'update');
+                Route::post('delete/{id}', 'delete');
             });
 
             Route::controller(CityController::class)->prefix('city')->group(function () {
-                Route::post('/', 'list')->middleware('services:admin');
-                Route::post('create', 'create')->middleware('services:admin');
-                Route::get('show/{id}', 'show')->middleware('services:admin');
-                Route::post('update/{id}', 'update')->middleware('services:admin');
-                Route::post('delete/{id}', 'delete')->middleware('services:admin');
+                Route::post('/', 'list');
+                Route::post('create', 'create');
+                Route::get('show/{id}', 'show');
+                Route::post('update/{id}', 'update');
+                Route::post('delete/{id}', 'delete');
             });
             Route::controller(ServiceTypeController::class)->prefix('service')->group(function () {
-                Route::post('/', 'list')->middleware('services:admin');
-                Route::post('create', 'create')->middleware('services:admin');
-                Route::get('show/{id}', 'show')->middleware('services:admin');
-                Route::post('update/{id}', 'update')->middleware('services:admin');
-                Route::post('delete/{id}', 'delete')->middleware('services:admin');
+                Route::post('/', 'list');
+                Route::post('create', 'create');
+                Route::get('show/{id}', 'show');
+                Route::post('update/{id}', 'update');
+                Route::post('delete/{id}', 'delete');
             });
         });
 
-        Route::group(['prefix' => 'owner'], function () {
-            Route::controller(UserController::class)->prefix('user')->group(function () {
-                Route::post('/', 'list')->middleware('services:admin|owner|mechanic');
-                Route::post('create', 'create')->middleware('services:admin|owner|mechanic|customer');
-                Route::get('show/{id}', 'show')->middleware('services:owner|mechanic|customer');
-                Route::post('update/{id}', 'update')->middleware('services:owner|mechanic|customer');
-                Route::post('delete/{id}', 'delete')->middleware('services:admin|owner|mechanic');
-            });
-
+        Route::group(['prefix' => 'owner', 'middleware' => 'services:owner'], function () {
             Route::controller(GarageController::class)->prefix('garage')->group(function () {
-                Route::post('/', 'list')->middleware('services:admin|owner|mechanic|customer');
-                Route::post('create', 'create')->middleware('services:owner|mechanic');
-                Route::get('show/{id}', 'show')->middleware('services:owner|mechanic');
-                Route::post('update/{id}', 'update')->middleware('services:owner|mechanic');
-                Route::post('delete/{id}', 'delete')->middleware('services:admin|owner|mechanic');
+                Route::post('/', 'list');
+                Route::post('create', 'create');
+                Route::get('show/{id}', 'show');
+                Route::post('update/{id}', 'update');
+                Route::post('delete/{id}', 'delete');
             });
 
             Route::controller(CarServiceController::class)->prefix('carservice')->group(function () {
-                Route::post('status/{id}', 'status')->middleware('services:owner|mechanic');
+                Route::post('status/{id}', 'status');
             });
 
             Route::controller(CarServiceJobController::class)->prefix('job')->group(function () {
-                Route::post('create', 'create')->middleware('services:owner|mechanic');
-                Route::get('show/{id}', 'show')->middleware('services:owner|mechanic');
-                Route::post('update/{id}', 'update')->middleware('services:owner|mechanic');
-                Route::post('status/{id}', 'status')->middleware('services:owner|mechanic');
+                Route::post('create', 'create');
+                Route::get('show/{id}', 'show');
+                Route::post('update/{id}', 'update');
             });
         });
 
-        Route::group(['prefix' => 'customer'], function () {
+        Route::group(['prefix' => 'mechanic', 'middleware' => 'services:mechanic'], function () {
+            Route::controller(CarServiceJobController::class)->prefix('job')->group(function () {
+                Route::post('status/{id}', 'status');
+            });
+        });
+
+        Route::group(['middleware' => 'services:owner|mechanic|customer'], function () {
+            Route::controller(UserController::class)->group(function () {
+                Route::post('/', 'list')->withoutMiddleware('services:customer|mechanic');
+                Route::post('create', 'create')->withoutMiddleware('services:customer|mechanic');
+                Route::get('show/{id}', 'show');
+                Route::post('update/{id}', 'update');
+                Route::post('delete/{id}', 'delete')->withoutMiddleware('services:customer|mechanic');
+            });
+
             Route::controller(CarController::class)->prefix('car')->group(function () {
-                Route::post('/', 'list')->middleware('services:admin|owner|mechanic|customer');
-                Route::post('create', 'create')->middleware('services:owner|mechanic|customer');
-                Route::get('show/{id}', 'show')->middleware('services:owner|mechanic|customer');
-                Route::post('update/{id}', 'update')->middleware('services:owner|mechanic|customer');
-                Route::post('delete/{id}', 'delete')->middleware('services:owner|mechanic|customer');
+                Route::post('/', 'list');
+                Route::post('create', 'create');
+                Route::get('show/{id}', 'show');
+                Route::post('update/{id}', 'update');
+                Route::post('delete/{id}', 'delete');
             });
         });
     });

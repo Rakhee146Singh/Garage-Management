@@ -15,13 +15,15 @@ class CityController extends Controller
      */
     public function list(Request $request)
     {
-        $request->validate([
-            'search'        => 'nullable|string',
-            'sortOrder'     => 'nullable|in:asc,desc',
-            'sortField'     => 'nullable|string',
-            'perPage'       => 'nullable|integer',
-            'currentPage'   => 'nullable|integer'
-        ]);
+        $request->validate(
+            [
+                'search'        => 'nullable|string',
+                'sortOrder'     => 'nullable|in:asc,desc',
+                'sortField'     => 'nullable|string',
+                'perPage'       => 'nullable|integer',
+                'currentPage'   => 'nullable|integer'
+            ]
+        );
         $query = City::query(); //query
 
         /* Searching */
@@ -41,10 +43,9 @@ class CityController extends Controller
             $query          = $query->skip($perPage * ($currentPage - 1))->take($perPage);
         }
         /* Get records */
-        $cities   = $query->get();
-        $data       = [
+        $data           = [
             'count'     => $count,
-            'cities'    => $cities
+            'cities'    => $query->get()
         ];
         return ok('City list', $data);
     }
@@ -57,10 +58,12 @@ class CityController extends Controller
      */
     public function create(Request $request)
     {
-        $request->validate([
-            'state_id'      => 'required|exists:states,id',
-            'name'          => 'required|alpha|max:30',
-        ]);
+        $request->validate(
+            [
+                'state_id'      => 'required|exists:states,id',
+                'name'          => 'required|alpha|max:30',
+            ]
+        );
         $city = City::create($request->only('state_id', 'name'));
         return ok('City created successfully!', $city->load('states'));
     }
@@ -86,10 +89,12 @@ class CityController extends Controller
     public function update(Request $request, $id)
     {
         $city = City::findOrFail($id);
-        $request->validate([
-            'state_id'      => 'required|exists:states,id',
-            'name'          => 'required|alpha|max:30',
-        ]);
+        $request->validate(
+            [
+                'state_id'      => 'required|exists:states,id',
+                'name'          => 'required|alpha|max:30',
+            ]
+        );
         $city->update($request->only('state_id', 'name'));
         return ok('City updated successfully!', $city->load('states'));
     }

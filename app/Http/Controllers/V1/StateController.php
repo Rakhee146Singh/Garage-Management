@@ -15,13 +15,15 @@ class StateController extends Controller
      */
     public function list(Request $request)
     {
-        $request->validate([
-            'search'        => 'nullable|string',
-            'sortOrder'     => 'nullable|in:asc,desc',
-            'sortField'     => 'nullable|string',
-            'perPage'       => 'nullable|integer',
-            'currentPage'   => 'nullable|integer'
-        ]);
+        $request->validate(
+            [
+                'search'        => 'nullable|string',
+                'sortOrder'     => 'nullable|in:asc,desc',
+                'sortField'     => 'nullable|string',
+                'perPage'       => 'nullable|integer',
+                'currentPage'   => 'nullable|integer'
+            ]
+        );
         $query = State::query(); //query
 
         /* Searching */
@@ -41,10 +43,9 @@ class StateController extends Controller
             $query          = $query->skip($perPage * ($currentPage - 1))->take($perPage);
         }
         /* Get records */
-        $states   = $query->get();
-        $data       = [
+        $data           = [
             'count'     => $count,
-            'states'    => $states
+            'states'    => $query->get()
         ];
         return ok('State list', $data);
     }
@@ -57,10 +58,12 @@ class StateController extends Controller
      */
     public function create(Request $request)
     {
-        $request->validate([
-            'country_id'      => 'required|exists:countries,id',
-            'name'            => 'required|alpha|max:30',
-        ]);
+        $request->validate(
+            [
+                'country_id'      => 'required|exists:countries,id',
+                'name'            => 'required|alpha|max:30',
+            ]
+        );
         $state = State::create($request->only('country_id', 'name'));
         return ok('State created successfully!', $state->load('countries'));
     }
@@ -86,10 +89,12 @@ class StateController extends Controller
     public function update(Request $request, $id)
     {
         $state = State::findOrFail($id);
-        $request->validate([
-            'country_id'      => 'required|exists:countries,id',
-            'name'            => 'required|alpha|max:30',
-        ]);
+        $request->validate(
+            [
+                'country_id'      => 'required|exists:countries,id',
+                'name'            => 'required|alpha|max:30',
+            ]
+        );
         $state->update($request->only('country_id', 'name'));
         return ok('State updated successfully!', $state->load('countries'));
     }
