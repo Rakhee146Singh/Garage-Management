@@ -62,7 +62,7 @@ class User extends Authenticatable
      */
     public function service()
     {
-        return $this->belongsToMany(ServiceType::class, 'user_service_types', 'user_id', 'service_type_id');
+        return $this->belongsToMany(ServiceType::class, 'user_service_types', 'user_id', 'service_type_id')->select('id', 'name');
     }
 
     /**
@@ -71,7 +71,7 @@ class User extends Authenticatable
      */
     public function cars()
     {
-        return $this->hasMany(Car::class)->select('id', 'user_id', 'company_name', 'model_name', 'manufacturing_year');
+        return $this->hasMany(Car::class, 'user_id')->select('id', 'user_id', 'company_name', 'model_name', 'manufacturing_year');
     }
 
     /**

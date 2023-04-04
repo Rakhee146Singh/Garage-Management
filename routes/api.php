@@ -6,7 +6,9 @@ use App\Http\Controllers\V1\CarController;
 use App\Http\Controllers\V1\AuthController;
 use App\Http\Controllers\V1\CityController;
 use App\Http\Controllers\V1\UserController;
+use App\Http\Controllers\V1\OrderController;
 use App\Http\Controllers\V1\StateController;
+use App\Http\Controllers\V1\StockController;
 use App\Http\Controllers\V1\GarageController;
 use App\Http\Controllers\V1\CountryController;
 use App\Http\Controllers\V1\CarServiceController;
@@ -28,9 +30,13 @@ Route::prefix('v1')->group(function () {
     /** Open API */
     Route::post('login', [AuthController::class, 'login']);
     Route::post('register', [AuthController::class, 'register']);
-    Route::post('garage', [AuthController::class, 'list']);
+    Route::post('garage', [AuthController::class, 'garageList']);
+    Route::post('stock', [AuthController::class, 'stockList']);
     Route::post('reset-password-email', [AuthController::class, 'resetMail']);
     Route::post('reset-password/{token}', [AuthController::class, 'reset']);
+
+    Route::get('approve/{id}', [OrderController::class, 'approve']);
+    Route::get('reject/{id}', [OrderController::class, 'reject']);
 
     Route::middleware('auth:sanctum')->group(function () {
         Route::get('logout', [AuthController::class, 'logout']);
@@ -78,6 +84,20 @@ Route::prefix('v1')->group(function () {
                 Route::post('delete/{id}', 'delete');
             });
 
+            Route::controller(StockController::class)->prefix('stock')->group(function () {
+                Route::post('/', 'list');
+                Route::post('create', 'create');
+                Route::get('show/{id}', 'show');
+                Route::post('update/{id}', 'update');
+                Route::post('delete/{id}', 'delete');
+            });
+
+            Route::controller(OrderController::class)->prefix('order')->group(function () {
+                Route::post('/', 'list');
+                Route::post('create', 'create');
+                Route::get('show/{id}', 'show');
+            });
+
             Route::controller(CarServiceController::class)->prefix('carservice')->group(function () {
                 Route::post('status/{id}', 'status');
             });
@@ -97,7 +117,7 @@ Route::prefix('v1')->group(function () {
 
         Route::group(['middleware' => 'services:owner|mechanic|customer'], function () {
             Route::controller(UserController::class)->group(function () {
-                Route::post('/', 'list')->withoutMiddleware('services:customer|mechanic');
+                Route::post('/', 'list')->withoutMiddleware('services:customer');
                 Route::post('create', 'create')->withoutMiddleware('services:customer|mechanic');
                 Route::get('show', 'show');
                 Route::post('update/{id}', 'update');

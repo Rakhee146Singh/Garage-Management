@@ -49,4 +49,13 @@ class Garage extends BaseModel
     {
         return $this->belongsTo(City::class, 'city_id')->select('id', 'state_id', 'name');
     }
+
+    /**
+     *  function for Garage hasMany Stocks
+     *
+     */
+    public function stocks()
+    {
+        return $this->hasMany(Stock::class, 'garage_id')->select('id', 'garage_id', 'name', 'description', 'price', 'quantity', 'is_available', 'manufacture_date');
+    }
 }
