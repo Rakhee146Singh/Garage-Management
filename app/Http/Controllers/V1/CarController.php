@@ -201,7 +201,9 @@ class CarController extends Controller
     public function delete($id)
     {
         $car = Car::findOrFail($id);
+        $car->carServices()->first()->jobs()->delete();
         $car->carServices()->delete();
+        $car->delete();
         return ok('Car deleted successfully');
     }
 }

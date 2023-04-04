@@ -4,6 +4,7 @@ namespace App\Http\Controllers\V1;
 
 use Carbon\Carbon;
 use App\Models\User;
+use App\Models\Stock;
 use App\Models\Garage;
 use App\Mail\ServiceMail;
 use App\Models\CarService;
@@ -28,23 +29,23 @@ class AuthController extends Controller
     {
         $request->validate(
             [
-                'city_id'                       => 'required|exists:cities,id',
-                'garage_id'                     => 'required_if:type,mechanic,customer|exists:garages,id',
-                'service_type_id.*'             => 'required_if:type,mechanic,customer|exists:service_types,id',
-                'first_name'                    => 'required|alpha|max:30',
-                'last_name'                     => 'required|alpha|max:30',
-                'email'                         => 'required|email|unique:users',
-                'password'                      => 'required|string|max:8',
-                'type'                          => 'required|in:mechanic,customer,owner',
-                'billable_name'                 => 'nullable|string',
-                'address1'                      => 'required|string|max:100',
-                'address2'                      => 'required|string|max:100',
-                'zipcode'                       => 'required|integer|min:6',
-                'phone'                         => 'required|unique:users|integer|min:10',
-                'profile_picture'               => 'required|mimes:jpg,jpeg,png,pdf',
-                'company_name'                  => 'required_if:type,customer|alpha|max:20',
-                'model_name'                    => 'required_if:type,customer|string|max:20',
-                'manufacturing_year'            => 'required_if:type,customer|date_format:Y',
+                'city_id'                    => 'required|exists:cities,id',
+                'garage_id'                  => 'required_if:type,mechanic,customer|exists:garages,id',
+                'service_type_id.*'          => 'required_if:type,mechanic,customer|exists:service_types,id',
+                'first_name'                 => 'required|alpha|max:30',
+                'last_name'                  => 'required|alpha|max:30',
+                'email'                      => 'required|email|unique:users',
+                'password'                   => 'required|string|max:8',
+                'type'                       => 'required|in:mechanic,customer,owner',
+                'billable_name'              => 'nullable|string',
+                'address1'                   => 'required|string|max:100',
+                'address2'                   => 'required|string|max:100',
+                'zipcode'                    => 'required|integer|min:6',
+                'phone'                      => 'required|unique:users|integer|min:10',
+                'profile_picture'            => 'required|mimes:jpg,jpeg,png,pdf',
+                'company_name'               => 'required_if:type,customer|alpha|max:20',
+                'model_name'                 => 'required_if:type,customer|string|max:20',
+                'manufacturing_year'         => 'required_if:type,customer|date_format:Y',
             ]
         );
         $request['password'] = Hash::make($request->password);
@@ -69,10 +70,10 @@ class AuthController extends Controller
                 'phone'
             ) +
                 [
-                    'billable_name' => $billable_name
+                    'billable_name'     => $billable_name
                 ] +
                 [
-                    'profile_picture' => $imageName
+                    'profile_picture'   => $imageName
                 ]
         );
 
@@ -98,11 +99,11 @@ class AuthController extends Controller
             foreach ($request->service_type_id as $service_id) {
                 $service = CarService::create(
                     [
-                        'garage_id' => $request->garage_id,
-                        'car_id' => $car->id
+                        'garage_id'         => $request->garage_id,
+                        'car_id'            => $car->id
                     ],
                     [
-                        'service_type_id' => $service_id
+                        'service_type_id'   => $service_id
                     ]
                 );
                 array_push($services, $service);
@@ -125,8 +126,8 @@ class AuthController extends Controller
     public function login(Request $request)
     {
         $request->validate([
-            'email'    => 'required|email|exists:users',
-            'password' => 'required|string|max:8',
+            'email'         => 'required|email|exists:users',
+            'password'      => 'required|string|max:8',
         ]);
 
         $user = User::where('email', $request->email)->first();
@@ -165,8 +166,8 @@ class AuthController extends Controller
     public function changePassword(Request $request)
     {
         $request->validate([
-            'old_password' => 'required|max:8',
-            'new_password' => 'required|confirmed|max:8',
+            'old_password'      => 'required|max:8',
+            'new_password'      => 'required|confirmed|max:8',
         ]);
 
         //Match The Old Password
@@ -248,18 +249,18 @@ class AuthController extends Controller
      *
      * @return json $garages
      */
-    public function list(Request $request)
+    public function garageList(Request $request)
     {
         $request->validate(
             [
-                'search'        => 'nullable|string',
-                'sortOrder'     => 'nullable|in:asc,desc',
-                'sortField'     => 'nullable|string',
-                'perPage'       => 'nullable|integer',
-                'currentPage'   => 'nullable|integer',
-                'city_id'       => 'nullable|exists:cities,id',
-                'state_id'      => 'nullable|exists:states,id',
-                'country_id'    => 'nullable|exists:countries,id',
+                'search'             => 'nullable|string',
+                'sortOrder'          => 'nullable|in:asc,desc',
+                'sortField'          => 'nullable|string',
+                'perPage'            => 'nullable|integer',
+                'currentPage'        => 'nullable|integer',
+                'city_id'            => 'nullable|exists:cities,id',
+                'state_id'           => 'nullable|exists:states,id',
+                'country_id'         => 'nullable|exists:countries,id',
             ]
         );
         $query = Garage::query()->with('services'); //query
@@ -304,5 +305,47 @@ class AuthController extends Controller
             'garages'   => $query->get()
         ];
         return ok('Garage list', $data);
+    }
+
+    /**
+     * API of listing Stock data.
+     *
+     * @return json $stocks
+     */
+    public function stockList(Request $request)
+    {
+        $request->validate(
+            [
+                'search'        => 'nullable|string',
+                'sortOrder'     => 'nullable|in:asc,desc',
+                'sortField'     => 'nullable|string',
+                'perPage'       => 'nullable|integer',
+                'currentPage'   => 'nullable|integer'
+            ]
+        );
+        $query = Stock::query()->with('garage'); //query
+
+        /* Searching */
+        if (isset($request->search)) {
+            $query = $query->where("name", "LIKE", "%{$request->search}%");
+        }
+        /* Sorting */
+        if ($request->sortField && $request->sortOrder) {
+            $query = $query->orderBy($request->sortField, $request->sortOrder);
+        }
+
+        /* Pagination */
+        $count = $query->count();
+        if ($request->perPage && $request->currentPage) {
+            $perPage        = $request->perPage;
+            $currentPage    = $request->currentPage;
+            $query          = $query->skip($perPage * ($currentPage - 1))->take($perPage);
+        }
+        /* Get records */
+        $data           = [
+            'count'     => $count,
+            'stocks'    => $query->get()
+        ];
+        return ok('Stocks list', $data);
     }
 }

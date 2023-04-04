@@ -28,8 +28,14 @@ class UserController extends Controller
         );
         $query = User::query(); //query
 
+        /** List of Garages with services having cars and mechanic details */
         if (auth()->user()->type == 'owner') {
             $query = $query->with('garages.services.cars.users')->where('id', Auth()->id());
+        }
+
+        /** List of services with cars details and owner details */
+        if (auth()->user()->type == 'mechanic') {
+            $query = $query->with('service.cars.users')->where('id', Auth()->id());
         }
 
         /* Searching */

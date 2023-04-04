@@ -52,6 +52,6 @@ class CarServiceJob extends BaseModel
      */
     public function serviceType()
     {
-        return $this->belongsTo(ServiceType::class, 'service_type_id');
+        return $this->belongsTo(ServiceType::class, 'service_type_id')->select('id', 'name');
     }
 }

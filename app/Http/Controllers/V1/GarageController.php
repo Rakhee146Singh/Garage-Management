@@ -6,7 +6,6 @@ use App\Models\User;
 use App\Models\Garage;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
-use Illuminate\Support\Facades\Auth;
 
 class GarageController extends Controller
 {
@@ -23,15 +22,14 @@ class GarageController extends Controller
                 'sortOrder'     => 'nullable|in:asc,desc',
                 'sortField'     => 'nullable|string',
                 'perPage'       => 'nullable|integer',
-                'currentPage'   => 'nullable|integer',
-                'city_id'       => 'nullable|exists:cities,id',
-                'state_id'      => 'nullable|exists:states,id',
-                'country_id'    => 'nullable|exists:countries,id',
+                'currentPage'   => 'nullable|integer'
             ]
         );
 
+        $query = Garage::query();
+
         if (auth()->user()->type == 'owner') {
-            $query = Garage::query()->with('users.service', 'users.cars.types', 'services');
+            $query = $query->with('users.service', 'users.cars.types', 'services', 'stocks');
         }
 
         /* Searching */
@@ -169,6 +167,7 @@ class GarageController extends Controller
     {
         $garage = Garage::findOrFail($id);
         $garage->users()->delete();
+        $garage->stocks()->delete();
         $garage->delete();
         return ok('Garage deleted successfully');
     }
