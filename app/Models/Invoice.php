@@ -11,7 +11,6 @@ class Invoice extends Model
 
     protected $fillable = [
         'order_id',
-        'stock_id',
         'user_id',
         'garage_id',
         'invoice_number',
@@ -35,6 +34,6 @@ class Invoice extends Model
      */
     public function order()
     {
-        return  $this->belongsTo(Order::class, 'order_id')->select('id', 'user_id', 'garage_id', 'stock_id', 'quantity', 'tax', 'total_amount', 'status',);
+        return  $this->belongsTo(Order::class, 'order_id')->select('id', 'user_id', 'garage_id', 'quantity', 'tax', 'total_amount', 'status',);
     }
 }

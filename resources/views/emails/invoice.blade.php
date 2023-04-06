@@ -23,27 +23,33 @@
         <table border="1">
             <thead>
                 <th>Invoice Number</th>
-                <th>Order Id</th>
+                <th>Order Number</th>
+                <th>Manufacture Date</th>
                 <th>Stock Name</th>
                 <th>Garage Name</th>
                 <th>Price</th>
                 <th>Quantity</th>
                 <th>Tax</th>
                 <th>Total Amount</th>
-                <th>Manufacture Date</th>
             </thead>
-            <tr>
-                <td>{{ $invoice->invoice_number }}</td>
-                <td>{{ $invoice->order_id }}</td>
-                <td>{{ $order->stock->name }}</td>
-                <td>{{ $order->stock->garage->name }}</td>
-                <td>{{ $order->stock->price }}</td>
-                <td>{{ $invoice->quantity }}</td>
-                <td>{{ $invoice->tax }}</td>
-                <td>{{ $invoice->total_amount }}</td>
-                <td>{{ $order->stock->manufacture_date }}</td>
-            </tr>
+            @foreach ($order->stocks as $stocks)
+                @php
+                    $tax = ($stocks->price * $order->tax) / 100;
+                @endphp
+                <tr>
+                    <td>{{ $invoice->invoice_number }}</td>
+                    <td>{{ $invoice->order_id }}</td>
+                    <td>{{ $stocks->manufacture_date }}</td>
+                    <td>{{ $stocks->name }}</td>
+                    <td>{{ $stocks->garage->name }}</td>
+                    <td>{{ $stocks->price }}</td>
+                    <td>{{ $invoice->quantity }}</td>
+                    <td>{{ $invoice->tax }}</td>
+                    <td>{{ ($stocks->price + $tax) * $order->quantity }}</td>
+                </tr>
+            @endforeach
         </table>
+        <a href="{{ url('api/v1/invoice', $order->id) }}"><button class='btn btn-primary'>Invoice Download</button></a>
         <div>
 </body>
 

@@ -5,9 +5,12 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
-class CarServiceType extends Model
+class OrderStock extends Model
 {
     use HasFactory;
 
-    protected $fillable = ['car_id', 'service_type_id'];
+    protected $fillable = [
+        'order_id',
+        'stock_id'
+    ];
 }

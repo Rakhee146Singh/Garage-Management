@@ -30,15 +30,20 @@
                 <th>Total Amount</th>
                 <th>Manufacture Date</th>
             </thead>
-            <tr>
-                <td>{{ $order->stock->garage->name }}</td>
-                <td>{{ $order->stock->name }}</td>
-                <td>{{ $order->stock->price }}</td>
-                <td>{{ $order->quantity }}</td>
-                <td>{{ $order->tax }}</td>
-                <td>{{ $order->total_amount }}</td>
-                <td>{{ $order->stock->manufacture_date }}</td>
-            </tr>
+            @foreach ($stocks as $stock)
+                @php
+                    $tax = ($stock->price * $order->tax) / 100;
+                @endphp
+                <tr>
+                    <td>{{ $stock->garage->name }}</td>
+                    <td>{{ $stock->name }}</td>
+                    <td>{{ $stock->price }}</td>
+                    <td>{{ $order->quantity }}</td>
+                    <td>{{ $order->tax }}</td>
+                    <td>{{ ($stock->price + $tax) * $order->quantity }}</td>
+                    <td>{{ $stock->manufacture_date }}</td>
+                </tr>
+            @endforeach
         </table>
         <div>
 </body>

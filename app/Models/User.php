@@ -84,6 +84,15 @@ class User extends Authenticatable
     }
 
     /**
+     *  function for User hasOne CarServiceJob
+     *
+     */
+    public function job()
+    {
+        return $this->hasOne(CarServiceJob::class, 'user_id')->select('id', 'car_service_id', 'user_id', 'service_type_id', 'status');
+    }
+
+    /**
      *  function for created_by and updated_by data for users
      *
      */

@@ -37,6 +37,7 @@ Route::prefix('v1')->group(function () {
 
     Route::get('approve/{id}', [OrderController::class, 'approve']);
     Route::get('reject/{id}', [OrderController::class, 'reject']);
+    Route::get('invoice/{id}', [OrderController::class, 'invoice']);
 
     Route::middleware('auth:sanctum')->group(function () {
         Route::get('logout', [AuthController::class, 'logout']);
@@ -96,6 +97,7 @@ Route::prefix('v1')->group(function () {
                 Route::post('/', 'list');
                 Route::post('create', 'create');
                 Route::get('show/{id}', 'show');
+                Route::get('invoice/{id}', 'invoice');
             });
 
             Route::controller(CarServiceController::class)->prefix('carservice')->group(function () {

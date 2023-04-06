@@ -15,7 +15,6 @@ return new class extends Migration
             $table->id();
             $table->unsignedBigInteger('user_id')->nullable();
             $table->unsignedBigInteger('garage_id')->nullable();
-            $table->unsignedBigInteger('stock_id')->nullable();
             $table->char('quantity', 3);
             $table->char('tax');
             $table->char('total_amount', 10);
@@ -26,7 +25,6 @@ return new class extends Migration
 
             $table->foreign('user_id')->references('id')->on('users')->onDelete('cascade');
             $table->foreign('garage_id')->references('id')->on('garages')->onDelete('cascade');
-            $table->foreign('stock_id')->references('id')->on('stocks')->onDelete('cascade');
         });
     }
 

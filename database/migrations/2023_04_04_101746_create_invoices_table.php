@@ -14,7 +14,6 @@ return new class extends Migration
         Schema::create('invoices', function (Blueprint $table) {
             $table->id();
             $table->unsignedBigInteger('order_id');
-            $table->unsignedBigInteger('stock_id');
             $table->unsignedBigInteger('user_id');
             $table->unsignedBigInteger('garage_id');
             $table->string('name', 30);
@@ -24,7 +23,6 @@ return new class extends Migration
             $table->timestamps();
 
             $table->foreign('order_id')->references('id')->on('orders')->onDelete('cascade');
-            $table->foreign('stock_id')->references('id')->on('stocks')->onDelete('cascade');
             $table->foreign('user_id')->references('id')->on('users')->onDelete('cascade');
             $table->foreign('garage_id')->references('id')->on('garages')->onDelete('cascade');
         });

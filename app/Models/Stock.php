@@ -37,6 +37,6 @@ class Stock extends BaseModel
      */
     public function orders()
     {
-        return $this->hasMany(Order::class, 'stock_id')->select('id', 'user_id', 'garage_id', 'stock_id', 'quantity', 'tax', 'total_amount');
+        return $this->belongsToMany(Order::class, 'order_stocks', 'stock_id', 'order_id')->select('id', 'user_id', 'garage_id', 'quantity', 'tax', 'total_amount');
     }
 }

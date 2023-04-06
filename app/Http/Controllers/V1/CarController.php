@@ -36,12 +36,12 @@ class CarController extends Controller
 
         /** Listing Car details for customer */
         if (auth()->user()->type == 'customer') {
-            $query = Car::query()->with('carServices.jobs.users');
+            $query = $query->with('carServices.jobs.users');
         }
 
         /** Listing Car details for mechanic */
         if (auth()->user()->type == 'mechanic') {
-            $query = Car::query()->with('carServices');
+            $query = $query->with('carServices');
         }
 
         /* Searching */
@@ -97,7 +97,6 @@ class CarController extends Controller
                     'user_id' => Auth::id()
                 ]
         );
-        $car->types()->attach($request->service_type_id);
         $user = $car->users;
 
         /** Insertion in Car Service Table with Car Details */
@@ -107,10 +106,10 @@ class CarController extends Controller
                 [
                     'garage_id'         => $request->garage_id,
                     'car_id'            => $car->id
-                ],
-                [
-                    'service_type_id'   => $service_id
-                ]
+                ] +
+                    [
+                        'service_type_id'   => $service_id
+                    ]
             );
             array_push($services, $service);
         }
@@ -165,7 +164,6 @@ class CarController extends Controller
                     'user_id' => Auth::id()
                 ]
         );
-        $car->types()->sync($request->service_type_id);
 
         /** Insertion in Car Service Table with Car Details */
         $services = [];
@@ -174,10 +172,10 @@ class CarController extends Controller
                 [
                     'garage_id'         => $request->garage_id,
                     'car_id'            => $car->id
-                ],
-                [
-                    'service_type_id'   => $service_id
-                ]
+                ] +
+                    [
+                        'service_type_id'   => $service_id
+                    ]
             );
             array_push($services, $service);
         }

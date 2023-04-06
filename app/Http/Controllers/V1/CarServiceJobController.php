@@ -29,13 +29,22 @@ class CarServiceJobController extends Controller
         );
 
         $user = User::findOrFail($request->user_id);
-        $job = CarServiceJob::create(
-            $request->only(
-                'car_service_id',
-                'user_id',
-                'service_type_id'
-            )
-        );
+
+        /** Check Mechanic Is available or not by status else Create job. */
+        if ($user->job()->count() > 0) {
+            if ($user->job->status == 'IP' || $user->job->status == 'P') {
+                return ok('mechanic not available');
+            }
+        } else {
+            $job = CarServiceJob::create(
+                $request->only(
+                    'car_service_id',
+                    'user_id',
+                    'service_type_id'
+                )
+            );
+        }
+
         Mail::to($user->email)->send(new MechanicServiceMail($job));
         return ok('Car Service Job created successfully!', $job);
     }
@@ -70,13 +79,20 @@ class CarServiceJobController extends Controller
         $job = CarServiceJob::findOrFail($id);
         $user = User::findOrFail($request->user_id);
 
-        $job->update(
-            $request->only(
-                'car_service_id',
-                'user_id',
-                'service_type_id'
-            )
-        );
+        /** Check Mechanic Is available or not by status else Update job. */
+        if ($user->job()->count() > 0) {
+            if ($user->job->status == 'IP' || $user->job->status == 'P') {
+                return ok('mechanic not available');
+            }
+        } else {
+            $job->update(
+                $request->only(
+                    'car_service_id',
+                    'user_id',
+                    'service_type_id'
+                )
+            );
+        }
         Mail::to($user->email)->send(new MechanicServiceMail($job));
         return ok('Car Service Job updated successfully!', $job);
     }

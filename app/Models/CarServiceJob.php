@@ -34,16 +34,7 @@ class CarServiceJob extends BaseModel
      */
     public function services()
     {
-        return $this->belongsTo(CarService::class, 'car_service_id')->select('id', 'garage_id', 'car_id', 'status');
-    }
-
-    /**
-     *  function for CarServiceJob belongs to CarService
-     *
-     */
-    public function users()
-    {
-        return $this->belongsTo(User::class, 'user_id')->select('id', 'first_name', 'email', 'phone');
+        return $this->belongsTo(CarService::class, 'car_service_id')->select('id', 'garage_id', 'car_id', 'service_type_id', 'status');
     }
 
     /**
