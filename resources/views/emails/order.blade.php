@@ -30,14 +30,33 @@
                 <th>Total Amount</th>
                 <th>Manufacture Date</th>
             </thead>
+            @foreach ($stocks as $stock)
+                @php
+                    $tax = ($stock->price * $order->tax) / 100;
+                @endphp
+                <tr>
+                    <td>{{ $stock->garage->name }}</td>
+                    <td>{{ $stock->name }}</td>
+                    <td>{{ $stock->price }}</td>
+                    <td>{{ $order->quantity }}</td>
+                    <td>{{ $order->tax }}</td>
+                    <td>{{ ($stock->price + $tax) * $order->quantity }}</td>
+                    <td>{{ $stock->manufacture_date }}</td>
+                </tr>
+            @endforeach
+
             <tr>
-                <td>{{ $stock->garage->name }}</td>
-                <td>{{ $stock->name }}</td>
-                <td>{{ $stock->price }}</td>
-                <td>{{ $order->quantity }}</td>
-                <td>{{ $order->tax }}</td>
-                <td>{{ $order->total_amount }}</td>
-                <td>{{ $stock->manufacture_date }}</td>
+                <td colspan="7">
+                    <div class="total-part">
+                        <div class="total-left w-85 float-left" align="left">
+                            <p>Total Amount</p>
+                        </div>
+                        <div class="total-right w-15 float-left text-bold" align="left">
+                            <p>{{ $order->total_amount }}</p>
+                        </div>
+                        <div style="clear: both;"></div>
+                    </div>
+                </td>
             </tr>
         </table>
         <a href="{{ url('api/v1/approve', $order->id) }}"><button class='btn btn-primary'>Accept</button></a>

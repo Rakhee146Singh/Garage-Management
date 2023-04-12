@@ -7,7 +7,7 @@ use Illuminate\Database\Eloquent\Model;
 class ServiceType extends Model
 {
     public $timestamps = false;
-    protected $fillable = ['name'];
+    protected $fillable = ['name', 'price'];
 
     /**
      *  function for ServiceType belongsToMany Garages
@@ -25,14 +25,5 @@ class ServiceType extends Model
     public function users()
     {
         return $this->belongsToMany(User::class, 'user_service_types', 'user_id', 'service_type_id')->select('id', 'city_id', 'first_name', 'email', 'address1', 'phone', 'profile_picture');
-    }
-
-    /**
-     *  function for ServiceType belongsToMany Users
-     *
-     */
-    public function cars()
-    {
-        return $this->belongsToMany(Car::class, 'car_service_types', 'car_id', 'service_type_id')->select('id', 'user_id', 'company_name', 'model_name', 'manufacturing_year');
     }
 }

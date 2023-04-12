@@ -11,20 +11,17 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('invoices', function (Blueprint $table) {
+        Schema::create('customer_invoices', function (Blueprint $table) {
             $table->id();
-            $table->unsignedBigInteger('order_id');
-            $table->unsignedBigInteger('user_id');
             $table->unsignedBigInteger('garage_id');
-            $table->string('name', 30);
-            $table->char('quantity', 3);
-            $table->char('tax');
+            $table->unsignedBigInteger('car_service_job_id');
+            $table->char('service_num', 6);
+            $table->char('extra_charges', 10)->nullable();
             $table->char('total_amount', 10);
             $table->timestamps();
 
-            $table->foreign('order_id')->references('id')->on('orders')->onDelete('cascade');
-            $table->foreign('user_id')->references('id')->on('users')->onDelete('cascade');
             $table->foreign('garage_id')->references('id')->on('garages')->onDelete('cascade');
+            $table->foreign('car_service_job_id')->references('id')->on('car_service_jobs')->onDelete('cascade');
         });
     }
 
@@ -33,6 +30,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('invoices');
+        Schema::dropIfExists('customer_invoices');
     }
 };

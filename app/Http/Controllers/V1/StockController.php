@@ -2,9 +2,12 @@
 
 namespace App\Http\Controllers\V1;
 
+use App\Models\User;
+use App\Models\Stock;
+use App\Models\Garage;
+use App\Models\GarageUser;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
-use App\Models\Stock;
 
 class StockController extends Controller
 {
@@ -25,6 +28,11 @@ class StockController extends Controller
             ]
         );
         $query = Stock::query(); //query
+
+        /** Listing Garage with Stocks and Orders to owner */
+        if (auth()->user()->type == 'owner') {
+            $query = $query->with('garage.stocks', 'orders');
+        }
 
         /* Searching */
         if (isset($request->search)) {
@@ -68,17 +76,22 @@ class StockController extends Controller
                 'manufacture_date'  => 'required|date|date_format:Y-m-d',
             ]
         );
-        $stock = Stock::create(
-            $request->only(
-                'garage_id',
-                'name',
-                'description',
-                'price',
-                'quantity',
-                'manufacture_date'
-            )
-        );
-        return ok('Stock created successfully!', $stock->load('garage'));
+        $garage = GarageUser::where('garage_id', $request->garage_id)->where('is_owner', true)->first();
+        if ($garage->user_id == auth()->user()->id) {
+            $stock = Stock::create(
+                $request->only(
+                    'garage_id',
+                    'name',
+                    'description',
+                    'price',
+                    'quantity',
+                    'manufacture_date'
+                )
+            );
+            return ok('Stock created successfully!', $stock->load('garage'));
+        } else {
+            return ok('User Not Valid for selected Garage');
+        }
     }
 
     /**
@@ -112,17 +125,22 @@ class StockController extends Controller
                 'manufacture_date'  => 'required|date|date_format:Y-m-d',
             ]
         );
-        $stock->update(
-            $request->only(
-                'garage_id',
-                'name',
-                'description',
-                'price',
-                'quantity',
-                'manufacture_date'
-            )
-        );
-        return ok('Stock updated successfully!', $stock->load('garage'));
+        $garage = GarageUser::where('garage_id', $request->garage_id)->where('is_owner', true)->first();
+        if ($garage->user_id == auth()->user()->id) {
+            $stock->update(
+                $request->only(
+                    'garage_id',
+                    'name',
+                    'description',
+                    'price',
+                    'quantity',
+                    'manufacture_date'
+                )
+            );
+            return ok('Stock updated successfully!', $stock->load('garage'));
+        } else {
+            return ok('User Not Valid for selected Garage');
+        }
     }
 
     /**

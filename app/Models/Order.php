@@ -12,7 +12,6 @@ class Order extends BaseModel
     protected $fillable = [
         'user_id',
         'garage_id',
-        'stock_id',
         'quantity',
         'tax',
         'total_amount',
@@ -45,16 +44,7 @@ class Order extends BaseModel
      */
     public function user()
     {
-        return  $this->belongsTo(User::class, 'user_id')->select('id', 'city_id', 'first_name', 'last_name', 'email', 'address1', 'address2', 'phone', 'profile_picture');
-    }
-
-    /**
-     *  function for Order hasMany Stocks
-     *
-     */
-    public function stock()
-    {
-        return $this->belongsTo(Stock::class, 'stock_id')->select('id', 'garage_id', 'name', 'description', 'price', 'manufacture_date');
+        return  $this->belongsTo(User::class, 'user_id')->select('id', 'city_id', 'first_name', 'last_name', 'email', 'address1', 'address2', 'phone', 'profile_picture', 'zipcode');
     }
 
     /**
@@ -63,6 +53,15 @@ class Order extends BaseModel
      */
     public function invoice()
     {
-        return $this->hasOne(Invoice::class, 'order_id')->select('id', 'order_id', 'stock_id', 'user_id', 'garage_id', 'invoice_number', 'quantity', 'tax', 'total_amount');
+        return $this->hasOne(Invoice::class, 'order_id')->select('id', 'order_id', 'user_id', 'garage_id', 'invoice_number', 'quantity', 'tax', 'total_amount');
+    }
+
+    /**
+     *  function for Order belongsToMany Stocks
+     *
+     */
+    public function stocks()
+    {
+        return $this->belongsToMany(Stock::class, 'order_stocks', 'order_id', 'stock_id')->select('id', 'garage_id', 'name', 'description', 'price', 'manufacture_date');
     }
 }

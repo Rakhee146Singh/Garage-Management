@@ -61,9 +61,15 @@ class ServiceTypeController extends Controller
         $request->validate(
             [
                 'name'         => 'required|alpha|max:30',
+                'price'        => 'required|numeric|max:10'
             ]
         );
-        $service = ServiceType::create($request->only('name'));
+        $service = ServiceType::create(
+            $request->only(
+                'name',
+                'price'
+            )
+        );
         return ok('Service Type created successfully!', $service);
     }
 
@@ -91,9 +97,15 @@ class ServiceTypeController extends Controller
         $request->validate(
             [
                 'name'         => 'required|alpha|max:30',
+                'price'        => 'required|numeric|max:10'
             ]
         );
-        $service->update($request->only('name'));
+        $service->update(
+            $request->only(
+                'name',
+                'price'
+            )
+        );
         return ok('Service Type updated successfully!', $service);
     }
 

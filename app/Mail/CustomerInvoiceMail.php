@@ -9,19 +9,20 @@ use Illuminate\Mail\Mailables\Content;
 use Illuminate\Mail\Mailables\Envelope;
 use Illuminate\Queue\SerializesModels;
 
-class OrderCancelMail extends Mailable
+class CustomerInvoiceMail extends Mailable
 {
     use Queueable, SerializesModels;
-    public $owner, $order, $stocks;
+    public $job, $user, $garage, $invoice;
 
     /**
      * Create a new message instance.
      */
-    public function __construct($owner, $order, $stocks)
+    public function __construct($job, $user, $garage, $invoice)
     {
-        $this->owner = $owner;
-        $this->order = $order;
-        $this->stocks = $stocks;
+        $this->job = $job;
+        $this->user = $user;
+        $this->garage = $garage;
+        $this->invoice = $invoice;
     }
 
     /**
@@ -30,7 +31,7 @@ class OrderCancelMail extends Mailable
     public function envelope(): Envelope
     {
         return new Envelope(
-            subject: 'Order Cancel Mail',
+            subject: 'Customer Invoice Mail',
         );
     }
 
@@ -40,7 +41,7 @@ class OrderCancelMail extends Mailable
     public function content(): Content
     {
         return new Content(
-            markdown: 'emails.orderCancel',
+            markdown: 'emails.customerInvoice',
         );
     }
 

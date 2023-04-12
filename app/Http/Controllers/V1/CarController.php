@@ -36,12 +36,12 @@ class CarController extends Controller
 
         /** Listing Car details for customer */
         if (auth()->user()->type == 'customer') {
-            $query = Car::query()->with('carServices.jobs.users');
+            $query = $query->with('carServices.jobs.users');
         }
 
         /** Listing Car details for mechanic */
         if (auth()->user()->type == 'mechanic') {
-            $query = Car::query()->with('carServices');
+            $query = $query->with('carServices');
         }
 
         /* Searching */
@@ -78,11 +78,11 @@ class CarController extends Controller
     {
         $request->validate(
             [
-                'garage_id'                     => 'required|exists:garages,id',
-                'company_name'                  => 'required|alpha|max:20',
-                'model_name'                    => 'required|string|max:20',
-                'manufacturing_year'            => 'required|date_format:Y',
-                'service_type_id.*'             => 'required|exists:service_types,id',
+                'garage_id'             => 'required|exists:garages,id',
+                'company_name'          => 'required|alpha|max:20',
+                'model_name'            => 'required|string|max:20',
+                'manufacturing_year'    => 'required|date_format:Y',
+                'service_type_id.*'     => 'required|exists:service_types,id',
             ]
         );
 
@@ -97,7 +97,6 @@ class CarController extends Controller
                     'user_id' => Auth::id()
                 ]
         );
-        $car->types()->attach($request->service_type_id);
         $user = $car->users;
 
         /** Insertion in Car Service Table with Car Details */
@@ -105,12 +104,12 @@ class CarController extends Controller
         foreach ($request->service_type_id as $service_id) {
             $service = CarService::create(
                 [
-                    'garage_id'         => $request->garage_id,
-                    'car_id'            => $car->id
-                ],
-                [
-                    'service_type_id'   => $service_id
-                ]
+                    'garage_id'             => $request->garage_id,
+                    'car_id'                => $car->id
+                ] +
+                    [
+                        'service_type_id'   => $service_id
+                    ]
             );
             array_push($services, $service);
         }
@@ -165,19 +164,18 @@ class CarController extends Controller
                     'user_id' => Auth::id()
                 ]
         );
-        $car->types()->sync($request->service_type_id);
 
         /** Insertion in Car Service Table with Car Details */
         $services = [];
         foreach ($request->service_type_id as $service_id) {
             $service = $car->carServices()->updateOrCreate(
                 [
-                    'garage_id'         => $request->garage_id,
-                    'car_id'            => $car->id
-                ],
-                [
-                    'service_type_id'   => $service_id
-                ]
+                    'garage_id'             => $request->garage_id,
+                    'car_id'                => $car->id
+                ] +
+                    [
+                        'service_type_id'   => $service_id
+                    ]
             );
             array_push($services, $service);
         }
