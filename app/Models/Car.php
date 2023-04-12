@@ -18,7 +18,7 @@ class Car extends BaseModel
      */
     public function users()
     {
-        return $this->belongsTo(User::class, 'user_id')->select('id', 'city_id', 'first_name', 'email', 'address1', 'phone', 'profile_picture');
+        return $this->belongsTo(User::class, 'user_id')->select('id', 'city_id', 'first_name', 'billable_name', 'email', 'address1', 'address2', 'phone', 'zipcode', 'profile_picture');
     }
 
     /**

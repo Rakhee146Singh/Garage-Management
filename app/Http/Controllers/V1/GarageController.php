@@ -81,6 +81,8 @@ class GarageController extends Controller
         );
 
         $user = User::findOrFail($request->user_id);
+
+        /** Restrict only owner can create garage */
         if ($user->type == "owner") {
             $garage = Garage::create(
                 $request->only(

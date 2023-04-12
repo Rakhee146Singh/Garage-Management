@@ -44,6 +44,19 @@
                     <td>{{ $stock->manufacture_date }}</td>
                 </tr>
             @endforeach
+            <tr>
+                <td colspan="7">
+                    <div class="total-part">
+                        <div class="total-left w-85 float-left" align="left">
+                            <p>Total Amount</p>
+                        </div>
+                        <div class="total-right w-15 float-left text-bold" align="left">
+                            <p>{{ $order->total_amount }}</p>
+                        </div>
+                        <div style="clear: both;"></div>
+                    </div>
+                </td>
+            </tr>
         </table>
         <div>
 </body>

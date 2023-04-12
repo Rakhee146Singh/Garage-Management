@@ -78,11 +78,11 @@ class CarController extends Controller
     {
         $request->validate(
             [
-                'garage_id'                     => 'required|exists:garages,id',
-                'company_name'                  => 'required|alpha|max:20',
-                'model_name'                    => 'required|string|max:20',
-                'manufacturing_year'            => 'required|date_format:Y',
-                'service_type_id.*'             => 'required|exists:service_types,id',
+                'garage_id'             => 'required|exists:garages,id',
+                'company_name'          => 'required|alpha|max:20',
+                'model_name'            => 'required|string|max:20',
+                'manufacturing_year'    => 'required|date_format:Y',
+                'service_type_id.*'     => 'required|exists:service_types,id',
             ]
         );
 
@@ -104,8 +104,8 @@ class CarController extends Controller
         foreach ($request->service_type_id as $service_id) {
             $service = CarService::create(
                 [
-                    'garage_id'         => $request->garage_id,
-                    'car_id'            => $car->id
+                    'garage_id'             => $request->garage_id,
+                    'car_id'                => $car->id
                 ] +
                     [
                         'service_type_id'   => $service_id
@@ -170,8 +170,8 @@ class CarController extends Controller
         foreach ($request->service_type_id as $service_id) {
             $service = $car->carServices()->updateOrCreate(
                 [
-                    'garage_id'         => $request->garage_id,
-                    'car_id'            => $car->id
+                    'garage_id'             => $request->garage_id,
+                    'car_id'                => $car->id
                 ] +
                     [
                         'service_type_id'   => $service_id

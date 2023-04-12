@@ -22,12 +22,12 @@ class CarServiceController extends Controller
             ]
         );
 
-        if (auth()->user()->type == 'owner') {
-            $carService = CarService::findOrFail($id);
-            $carService->update($request->only('status'));
-        } else {
+        if (auth()->user()->type != 'owner') {
             return ok('User Invalid');
         }
+
+        $carService = CarService::findOrFail($id);
+        $carService->update($request->only('status'));
         return ok('Car Service status updated successfully', $carService->load('jobs'));
     }
 }

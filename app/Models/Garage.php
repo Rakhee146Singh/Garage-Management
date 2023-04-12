@@ -29,7 +29,7 @@ class Garage extends BaseModel
      */
     public function services()
     {
-        return $this->belongsToMany(ServiceType::class, 'garage_service_types', 'garage_id', 'service_type_id')->select('id', 'name');
+        return $this->belongsToMany(ServiceType::class, 'garage_service_types', 'garage_id', 'service_type_id')->select('id', 'name', 'price');
     }
 
     /**

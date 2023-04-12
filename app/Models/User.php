@@ -62,7 +62,7 @@ class User extends Authenticatable
      */
     public function service()
     {
-        return $this->belongsToMany(ServiceType::class, 'user_service_types', 'user_id', 'service_type_id')->select('id', 'name');
+        return $this->belongsToMany(ServiceType::class, 'user_service_types', 'user_id', 'service_type_id')->select('id', 'name', 'price');
     }
 
     /**
@@ -89,7 +89,7 @@ class User extends Authenticatable
      */
     public function job()
     {
-        return $this->hasOne(CarServiceJob::class, 'user_id')->select('id', 'car_service_id', 'user_id', 'service_type_id', 'status');
+        return $this->hasMany(CarServiceJob::class, 'user_id')->select('id', 'car_service_id', 'user_id', 'service_type_id', 'start_time', 'end_time', 'status');
     }
 
     /**

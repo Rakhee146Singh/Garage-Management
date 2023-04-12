@@ -85,7 +85,9 @@ class OrderController extends Controller
         );
 
         $garage = GarageUser::where('garage_id', $request->garage_id)->where('is_owner', true)->first();
-        $user = User::findOrFail($request->user_id);
+        $user   = User::findOrFail($request->user_id);
+
+        /** Restrict owner should not belong to same garage requested */
         if (($user->id == $garage->user_id) && auth()->user()->type == 'owner') {
             return ok('You are not allowed to order');
         }
@@ -96,15 +98,28 @@ class OrderController extends Controller
         }
 
         /** Multiple Stock Order by Owner */
-        $stocks = [];
+        $stocks       = [];
         $total_amount = 0;
         foreach ($request->stock_id as $stock_id) {
-            $stock = Stock::findOrFail($stock_id);
-            $tax = ($stock->price * $request->tax) / 100;
-            $total_amount += ($stock->price + $tax) * $request->quantity;
+            $stock          = Stock::findOrFail($stock_id);
+            $tax            = ($stock->price * $request->tax) / 100;
+            $total_amount   += ($stock->price + $tax) * $request->quantity;
+
             array_push($stocks, $stock);
         }
 
+        /** Check quantity available or not */
+        // $quantity = $request->quantity > $stock->quantity;
+        // if ($quantity) {
+        //     return ok('Not enough stock for the stock name: ' . $stock->name);
+        // } elseif ($stock->quantity == 0) {
+        //     return ok('Product out of stock');
+        // }
+        // $qty = $stock->quantity - $request->quantity;
+        // $abc = Stock::update(['quantity' => $qty]);
+        // dd($abc);
+
+        /** Order create by owner */
         $order = Order::create(
             $request->only(
                 'user_id',
@@ -119,9 +134,9 @@ class OrderController extends Controller
         $order->stocks()->attach($request->stock_id);
 
         /** Sending mail to Garage owner with Order with Total Amount */
-        // $owner_data = GarageUser::where('garage_id', $request->garage_id)->where('is_owner', true)->first();
-        // $owner      = User::findOrFail($owner_data->user_id);
-        // Mail::to($owner->email)->send(new OrderMail($owner, $order, $stocks));
+        $owner_data = GarageUser::where('garage_id', $request->garage_id)->where('is_owner', true)->first();
+        $owner      = User::findOrFail($owner_data->user_id);
+        Mail::to($owner->email)->send(new OrderMail($owner, $order, $stocks));
 
         return ok('Order created successfully!', $order->load('stocks', 'user'));
     }
@@ -201,8 +216,11 @@ class OrderController extends Controller
 
         /** Order Reject for Multiple stock created when Orderded */
         $stocks = [];
+        $total_amount = 0;
         foreach ($order->stocks as $stock) {
-            $stock = Stock::where('id', $stock->id)->first();
+            $stock          = Stock::where('id', $stock->id)->first();
+            $tax            = ($stock->price * $order->tax) / 100;
+            $total_amount   += ($stock->price + $tax) * $order->quantity;
             array_push($stocks, $stock);
         }
 
@@ -221,16 +239,16 @@ class OrderController extends Controller
      */
     public function invoice($id)
     {
-        $order = Order::findOrFail($id);
-        $invoice = $order->invoice;
+        $order      = Order::findOrFail($id);
+        $invoice    = $order->invoice;
 
         /** Get data of Owner */
         $owner_data = GarageUser::where('garage_id', $order->garage_id)->where('is_owner', true)->first();
         $owner      = User::findOrFail($owner_data->user_id);
-        $todayDate = Carbon::now()->format('d-m-Y');
+        $todayDate  = Carbon::now()->format('d-m-Y');
 
         /** Download Pdf of Invoice */
-        $pdf = PDF::loadView('invoice_pdf', array('invoice' => $invoice, 'order' => $order, 'owner' => $owner));
+        $pdf        = PDF::loadView('invoice_pdf', array('invoice' => $invoice, 'order' => $order, 'owner' => $owner));
         return $pdf->download('invoice' . $order->id . '-' . $todayDate . '.pdf');
     }
 }

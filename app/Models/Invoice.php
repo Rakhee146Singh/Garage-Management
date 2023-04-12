@@ -29,7 +29,7 @@ class Invoice extends Model
     }
 
     /**
-     *  function for Invoice belongsTo User
+     *  function for Invoice belongsTo Order
      *
      */
     public function order()

@@ -7,7 +7,7 @@ use Illuminate\Database\Eloquent\Model;
 class ServiceType extends Model
 {
     public $timestamps = false;
-    protected $fillable = ['name'];
+    protected $fillable = ['name', 'price'];
 
     /**
      *  function for ServiceType belongsToMany Garages
