@@ -21,7 +21,7 @@
 <body>
     <div>
         <p>Hey {{ $owner->first_name }},</p>
-        <p>Myself {{ $user->first_name }} </p>
+        <p>Myself {{ $car->users->first_name }} </p>
         <p>I have Updated My Car Service</p>
         <p>My Updated Car Service ID:
             @foreach ($services as $service)

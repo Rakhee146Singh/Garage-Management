@@ -12,15 +12,14 @@ use Illuminate\Queue\SerializesModels;
 class UpdateCarMail extends Mailable
 {
     use Queueable, SerializesModels;
-    public $owner, $user, $car, $services;
+    public $owner, $car, $services;
 
     /**
      * Create a new message instance.
      */
-    public function __construct($owner, $user, $car, $services)
+    public function __construct($owner, $car, $services)
     {
         $this->owner = $owner;
-        $this->user = $user;
         $this->car = $car;
         $this->services = $services;
     }
