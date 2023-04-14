@@ -97,7 +97,6 @@ class CarController extends Controller
                     'user_id' => Auth::id()
                 ]
         );
-        $user = $car->users;
 
         /** Insertion in Car Service Table with Car Details */
         $services = [];
@@ -118,7 +117,7 @@ class CarController extends Controller
         if (auth()->user()->type == 'mechanic' || auth()->user()->type == 'customer') {
             $owner_data = GarageUser::where('garage_id', $request->garage_id)->where('is_owner', true)->first();
             $owner      = User::findOrFail($owner_data->user_id);
-            Mail::to($owner->email)->send(new ServiceMail($owner, $user, $car, $services));
+            Mail::to($owner->email)->send(new ServiceMail($owner, $car, $services));
         }
         return ok('Car created successfully!', $car->load('carServices'));
     }
@@ -182,10 +181,9 @@ class CarController extends Controller
 
         /** If car updated by mechanic or customer send mail to Garage owner with Updated Car Service Id */
         if (auth()->user()->type == 'mechanic' || auth()->user()->type == 'customer') {
-            $user       = $car->users;
             $owner_data = GarageUser::where('garage_id', $request->garage_id)->where('is_owner', true)->first();
             $owner      = User::findOrFail($owner_data->user_id);
-            Mail::to($owner->email)->send(new UpdateCarMail($owner, $user, $car, $services));
+            Mail::to($owner->email)->send(new UpdateCarMail($owner, $car, $services));
         }
         return ok('Car Updated successfully!', $car->load('carServices'));
     }

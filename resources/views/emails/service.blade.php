@@ -21,7 +21,7 @@
 <body>
     <div>
         <p>Hey {{ $owner->first_name }},</p>
-        <p>Myself {{ $user->first_name }} </p>
+        <p>Myself {{ $car->users->first_name }} </p>
         <p>I want to get my Car Service</p>
         <p>My Car Service ID:
             @foreach ($services as $service)
@@ -36,7 +36,6 @@
                 <th>Model Name</th>
                 <th>Manufacturing Year</th>
             </thead>
-            {{-- @foreach ($cars as $car) --}}
             @foreach ($car->types as $service)
                 <tr>
                     <td>{{ $service->name }}</td>

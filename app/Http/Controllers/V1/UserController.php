@@ -113,10 +113,8 @@ class UserController extends Controller
                     'phone'
                 ) +
                     [
-                        'billable_name' => $billable_name
-                    ] +
-                    [
-                        'profile_picture' => $imageName
+                        'billable_name'     => $billable_name,
+                        'profile_picture'   => $imageName
                     ]
             );
             /** Insert data in pivot table for customer and mechanic */
@@ -192,9 +190,7 @@ class UserController extends Controller
                 'phone'
             ) +
                 [
-                    'billable_name' => $billable_name
-                ] +
-                [
+                    'billable_name' => $billable_name,
                     'profile_picture' => $imageName
                 ]
         );

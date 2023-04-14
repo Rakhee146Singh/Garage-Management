@@ -70,9 +70,7 @@ class AuthController extends Controller
                 'phone'
             ) +
                 [
-                    'billable_name'     => $billable_name
-                ] +
-                [
+                    'billable_name'     => $billable_name,
                     'profile_picture'   => $imageName
                 ]
         );
@@ -92,7 +90,6 @@ class AuthController extends Controller
                     'manufacturing_year'
                 )
             );
-            $car->types()->attach($request->service_type_id);
 
             /** Insertion in Car Service Table with Car Details */
             $services = [];
@@ -101,10 +98,10 @@ class AuthController extends Controller
                     [
                         'garage_id'         => $request->garage_id,
                         'car_id'            => $car->id
-                    ],
-                    [
-                        'service_type_id'   => $service_id
-                    ]
+                    ] +
+                        [
+                            'service_type_id'   => $service_id
+                        ]
                 );
                 array_push($services, $service);
             }
