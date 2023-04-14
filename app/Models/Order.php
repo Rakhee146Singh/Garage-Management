@@ -53,7 +53,7 @@ class Order extends BaseModel
      */
     public function invoice()
     {
-        return $this->hasOne(Invoice::class, 'order_id')->select('id', 'order_id', 'user_id', 'garage_id', 'invoice_number', 'quantity', 'tax', 'total_amount');
+        return $this->hasOne(Invoice::class, 'order_id')->select('id', 'order_id', 'user_id', 'garage_id', 'invoice_number', 'tax', 'total_amount');
     }
 
     /**
@@ -62,6 +62,6 @@ class Order extends BaseModel
      */
     public function stocks()
     {
-        return $this->belongsToMany(Stock::class, 'order_stocks', 'order_id', 'stock_id')->select('id', 'garage_id', 'name', 'description', 'price', 'manufacture_date');
+        return $this->belongsToMany(Stock::class, 'order_stocks', 'order_id', 'stock_id')->select('id', 'garage_id', 'name', 'description', 'price', 'manufacture_date')->withPivot('quantity');
     }
 }

@@ -15,6 +15,7 @@ use Illuminate\Support\Str;
 use Illuminate\Http\Request;
 use App\Mail\OrderCancelMail;
 use App\Http\Controllers\Controller;
+use App\Models\OrderStock;
 use Illuminate\Support\Facades\Mail;
 
 class OrderController extends Controller
@@ -61,8 +62,9 @@ class OrderController extends Controller
         /* Get records */
         $data           = [
             'count'     => $count,
-            'stocks'    => $query->get()
+            'orders'    => $query->get()
         ];
+
         return ok('Orders list', $data);
     }
 
@@ -76,14 +78,14 @@ class OrderController extends Controller
     {
         $request->validate(
             [
-                'user_id'           => 'required|exists:users,id',
-                'garage_id'         => 'required|exists:garages,id',
-                'quantity'          => 'required|integer|max:50',
-                'tax'               => 'required|integer|max:100',
-                'stock_id.*'        => 'required|exists:stocks,id',
+                'user_id'               => 'required|exists:users,id',
+                'garage_id'             => 'required|exists:garages,id',
+                'tax'                   => 'required|integer|max:100',
+                'orders'                => 'required',
+                'orders.*.stock_id'     => 'required|exists:stocks,id',
+                'orders.*.quantity'     => 'required|integer|max:50',
             ]
         );
-
         $garage = GarageUser::where('garage_id', $request->garage_id)->where('is_owner', true)->first();
         $user   = User::findOrFail($request->user_id);
 
@@ -98,45 +100,45 @@ class OrderController extends Controller
         }
 
         /** Multiple Stock Order by Owner */
-        $stocks       = [];
         $total_amount = 0;
-        foreach ($request->stock_id as $stock_id) {
-            $stock          = Stock::findOrFail($stock_id);
+        $sum = 0;
+        foreach ($request->orders as $order) {
+            $stock          = Stock::findOrFail($order['stock_id']);
             $tax            = ($stock->price * $request->tax) / 100;
-            $total_amount   += ($stock->price + $tax) * $request->quantity;
+            $total_amount   += ($stock->price + $tax) * $order['quantity'];
 
-            array_push($stocks, $stock);
+            /** Check quantity available or not */
+            if ($order['quantity'] > $stock->quantity) {
+                return ok('Not enough stock for the stock name: ' . $stock->name);
+            } elseif ($stock->quantity == 0) {
+                return ok('Product out of stock');
+            }
+
+            /** Update quantity when order made by owner */
+            $qty = $stock->quantity - $order['quantity'];
+            $stock->update(['quantity' => $qty]);
+            $sum += $order['quantity'];
         }
-
-        /** Check quantity available or not */
-        // $quantity = $request->quantity > $stock->quantity;
-        // if ($quantity) {
-        //     return ok('Not enough stock for the stock name: ' . $stock->name);
-        // } elseif ($stock->quantity == 0) {
-        //     return ok('Product out of stock');
-        // }
-        // $qty = $stock->quantity - $request->quantity;
-        // $abc = Stock::update(['quantity' => $qty]);
-        // dd($abc);
 
         /** Order create by owner */
         $order = Order::create(
             $request->only(
                 'user_id',
                 'garage_id',
-                'quantity',
                 'tax'
             ) +
                 [
                     'total_amount'  => $total_amount,
+                    'quantity'      => $sum
                 ]
         );
-        $order->stocks()->attach($request->stock_id);
+
+        $order->stocks()->attach($request->orders);
 
         /** Sending mail to Garage owner with Order with Total Amount */
         $owner_data = GarageUser::where('garage_id', $request->garage_id)->where('is_owner', true)->first();
         $owner      = User::findOrFail($owner_data->user_id);
-        Mail::to($owner->email)->send(new OrderMail($owner, $order, $stocks));
+        Mail::to($owner->email)->send(new OrderMail($owner, $order->load('stocks')));
 
         return ok('Order created successfully!', $order->load('stocks', 'user'));
     }
@@ -180,7 +182,6 @@ class OrderController extends Controller
                 'user_id'           => $order->user_id,
                 'garage_id'         => $order->garage_id,
                 'invoice_number'    => Str::random(6),
-                'quantity'          => $order->quantity,
                 'tax'               => $order->tax,
                 'total_amount'      => $order->total_amount
             ]
@@ -189,7 +190,7 @@ class OrderController extends Controller
         /** Sending mail to Garage owner with Order details and Generate invoice */
         $owner_data = GarageUser::where('garage_id', $order->garage_id)->where('is_owner', true)->first();
         $owner      = User::findOrFail($owner_data->user_id);
-        Mail::to($owner->email)->send(new InvoiceMail($owner, $order, $invoice));
+        Mail::to($owner->email)->send(new InvoiceMail($owner, $order->load('stocks'), $invoice));
 
         return ok('Invoice Generated successfully', $invoice);
     }
@@ -215,19 +216,18 @@ class OrderController extends Controller
         }
 
         /** Order Reject for Multiple stock created when Orderded */
-        $stocks = [];
         $total_amount = 0;
         foreach ($order->stocks as $stock) {
             $stock          = Stock::where('id', $stock->id)->first();
             $tax            = ($stock->price * $order->tax) / 100;
             $total_amount   += ($stock->price + $tax) * $order->quantity;
-            array_push($stocks, $stock);
         }
 
         /** Sending mail to Garage owner with Customer Car details and Car Service Id*/
         $owner_data = GarageUser::where('garage_id', $order->garage_id)->where('is_owner', true)->first();
         $owner      = User::findOrFail($owner_data->user_id);
-        Mail::to($owner->email)->send(new OrderCancelMail($owner, $order, $stocks));
+        Mail::to($owner->email)->send(new OrderCancelMail($owner, $order->load('stocks')));
+
         return ok('Your Order Is been Cancelled');
     }
 

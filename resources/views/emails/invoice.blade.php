@@ -32,20 +32,20 @@
                 <th>Tax</th>
                 <th>Total Amount</th>
             </thead>
-            @foreach ($order->stocks as $stocks)
+            @foreach ($order->stocks as $stock)
                 @php
-                    $tax = ($stocks->price * $order->tax) / 100;
+                    $tax = ($stock->price * $order->tax) / 100;
                 @endphp
                 <tr>
                     <td>{{ $invoice->invoice_number }}</td>
                     <td>{{ $invoice->order_id }}</td>
-                    <td>{{ $stocks->manufacture_date }}</td>
-                    <td>{{ $stocks->name }}</td>
-                    <td>{{ $stocks->garage->name }}</td>
-                    <td>{{ $stocks->price }}</td>
-                    <td>{{ $invoice->quantity }}</td>
+                    <td>{{ $stock->manufacture_date }}</td>
+                    <td>{{ $stock->name }}</td>
+                    <td>{{ $stock->garage->name }}</td>
+                    <td>{{ $stock->price }}</td>
+                    <td>{{ $stock->pivot->quantity }}</td>
                     <td>{{ $invoice->tax }}</td>
-                    <td>{{ ($stocks->price + $tax) * $order->quantity }}</td>
+                    <td>{{ ($stock->price + $tax) * $stock->pivot->quantity }}</td>
                 </tr>
             @endforeach
         </table>

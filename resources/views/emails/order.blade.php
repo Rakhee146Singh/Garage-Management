@@ -18,7 +18,7 @@
     <div>
         <p>Hey {{ $owner->first_name }},</p>
         <p>Myself {{ $order->user->first_name }} </p>
-        <p>I want to Order Your Product of Garage</p>
+        <p>I want to Order Product from your Garage</p>
         <h5>Order Details</h5>
         <table border="1">
             <thead>
@@ -30,7 +30,7 @@
                 <th>Total Amount</th>
                 <th>Manufacture Date</th>
             </thead>
-            @foreach ($stocks as $stock)
+            @foreach ($order->stocks as $stock)
                 @php
                     $tax = ($stock->price * $order->tax) / 100;
                 @endphp
@@ -38,9 +38,9 @@
                     <td>{{ $stock->garage->name }}</td>
                     <td>{{ $stock->name }}</td>
                     <td>{{ $stock->price }}</td>
-                    <td>{{ $order->quantity }}</td>
+                    <td>{{ $stock->pivot->quantity }}</td>
                     <td>{{ $order->tax }}</td>
-                    <td>{{ ($stock->price + $tax) * $order->quantity }}</td>
+                    <td>{{ ($stock->price + $tax) * $stock->pivot->quantity }}</td>
                     <td>{{ $stock->manufacture_date }}</td>
                 </tr>
             @endforeach
