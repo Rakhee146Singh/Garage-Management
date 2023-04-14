@@ -37,6 +37,6 @@ class Stock extends BaseModel
      */
     public function orders()
     {
-        return $this->belongsToMany(Order::class, 'order_stocks', 'stock_id', 'order_id')->select('id', 'user_id', 'garage_id', 'quantity', 'tax', 'total_amount');
+        return $this->belongsToMany(Order::class, 'order_stocks', 'stock_id', 'order_id')->select('id', 'user_id', 'garage_id', 'quantity', 'tax', 'total_amount')->withPivot('quantity');
     }
 }

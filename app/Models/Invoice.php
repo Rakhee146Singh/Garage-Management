@@ -14,7 +14,6 @@ class Invoice extends Model
         'user_id',
         'garage_id',
         'invoice_number',
-        'quantity',
         'tax',
         'total_amount',
     ];

@@ -11,6 +11,7 @@ class OrderStock extends Model
 
     protected $fillable = [
         'order_id',
-        'stock_id'
+        'stock_id',
+        'quantity'
     ];
 }

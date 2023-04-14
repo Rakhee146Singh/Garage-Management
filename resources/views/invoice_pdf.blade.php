@@ -167,18 +167,18 @@
                     <th class="w-50">Total Amount</th>
                 </tr>
 
-                @foreach ($order->stocks as $stocks)
+                @foreach ($order->stocks as $stock)
                     @php
-                        $tax = ($stocks->price * $order->tax) / 100;
+                        $tax = ($stock->price * $order->tax) / 100;
                     @endphp
                     <tr align="center">
-                        <td>{{ $stocks->garage->name }}</td>
-                        <td>{{ $stocks->name }}</td>
-                        <td>{{ $stocks->manufacture_date }}</td>
-                        <td>{{ $stocks->price }}</td>
-                        <td>{{ $invoice->quantity }}</td>
+                        <td>{{ $stock->garage->name }}</td>
+                        <td>{{ $stock->name }}</td>
+                        <td>{{ $stock->manufacture_date }}</td>
+                        <td>{{ $stock->price }}</td>
+                        <td>{{ $stock->pivot->quantity }}</td>
                         <td>{{ $invoice->tax }}</td>
-                        <td>{{ ($stocks->price + $tax) * $order->quantity }}</td>
+                        <td>{{ ($stock->price + $tax) * $stock->pivot->quantity }}</td>
                     </tr>
                 @endforeach
                 <tr>
