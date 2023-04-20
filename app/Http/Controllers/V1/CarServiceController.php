@@ -16,9 +16,16 @@ class CarServiceController extends Controller
      */
     public function status(Request $request, $id)
     {
-        $request->validate([
-            'status'          => 'required|in:Delay,Delivered',
-        ]);
+        $request->validate(
+            [
+                'status'          => 'required|in:DE,D',
+            ]
+        );
+
+        if (auth()->user()->type != 'owner') {
+            return ok('User Invalid');
+        }
+
         $carService = CarService::findOrFail($id);
         $carService->update($request->only('status'));
         return ok('Car Service status updated successfully', $carService->load('jobs'));

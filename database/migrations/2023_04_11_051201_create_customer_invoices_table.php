@@ -11,15 +11,17 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('car_services', function (Blueprint $table) {
+        Schema::create('customer_invoices', function (Blueprint $table) {
             $table->id();
             $table->unsignedBigInteger('garage_id');
-            $table->unsignedBigInteger('car_id');
-            $table->enum('status', ['I', 'IP', 'DE', 'C', 'D'])->comment('I:Initiated', 'IP:In-Progress', 'DE:Delay', 'C:Completed', 'D:Delivered');
+            $table->unsignedBigInteger('car_service_job_id');
+            $table->char('service_num', 6);
+            $table->char('extra_charges', 10)->nullable();
+            $table->char('total_amount', 10);
             $table->timestamps();
 
             $table->foreign('garage_id')->references('id')->on('garages')->onDelete('cascade');
-            $table->foreign('car_id')->references('id')->on('cars')->onDelete('cascade');
+            $table->foreign('car_service_job_id')->references('id')->on('car_service_jobs')->onDelete('cascade');
         });
     }
 
@@ -28,6 +30,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('car_services');
+        Schema::dropIfExists('customer_invoices');
     }
 };

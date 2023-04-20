@@ -11,9 +11,8 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('service_types', function (Blueprint $table) {
-            $table->id();
-            $table->string('name');
+        Schema::table('orders', function (Blueprint $table) {
+            $table->enum('status', ['P', 'A', 'R'])->comment('P:Pending', 'A:Accept', 'R:Reject')->after('total_amount')->nullable();
         });
     }
 
@@ -22,6 +21,8 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('service_types');
+        Schema::table('orders', function (Blueprint $table) {
+            //
+        });
     }
 };

@@ -29,7 +29,7 @@ class Garage extends BaseModel
      */
     public function services()
     {
-        return $this->belongsToMany(ServiceType::class, 'garage_service_types', 'garage_id', 'service_type_id')->select('id', 'name');
+        return $this->belongsToMany(ServiceType::class, 'garage_service_types', 'garage_id', 'service_type_id')->select('id', 'name', 'price');
     }
 
     /**
@@ -38,15 +38,24 @@ class Garage extends BaseModel
      */
     public function users()
     {
-        return $this->belongsToMany(User::class, 'garage_users', 'garage_id', 'user_id')->withPivot('is_owner')->select('id', 'city_id', 'first_name', 'email', 'address1', 'phone', 'profile_picture');
+        return $this->belongsToMany(User::class, 'garage_users', 'garage_id', 'user_id')->withPivot('is_owner')->select('id', 'city_id', 'first_name', 'email', 'type', 'address1', 'phone', 'profile_picture');
     }
 
     /**
-     *  function for State hasMany Cities
+     *  function for Garage belongsTo Cities
      *
      */
     public function cities()
     {
-        return $this->belongsTo(City::class, 'state_id')->select('id', 'state_id', 'name');
+        return $this->belongsTo(City::class, 'city_id')->select('id', 'state_id', 'name');
+    }
+
+    /**
+     *  function for Garage hasMany Stocks
+     *
+     */
+    public function stocks()
+    {
+        return $this->hasMany(Stock::class, 'garage_id')->select('id', 'garage_id', 'name', 'description', 'price', 'quantity', 'is_available', 'manufacture_date');
     }
 }

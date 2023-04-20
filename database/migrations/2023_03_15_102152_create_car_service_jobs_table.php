@@ -13,10 +13,10 @@ return new class extends Migration
     {
         Schema::create('car_service_jobs', function (Blueprint $table) {
             $table->id();
-            $table->unsignedBigInteger('car_service_id');
-            $table->unsignedBigInteger('user_id');
-            $table->unsignedBigInteger('service_type_id');
-            $table->enum('status', ['Pending', 'In-Progress', 'Complete'])->default('Pending');
+            $table->unsignedBigInteger('car_service_id')->nullable();
+            $table->unsignedBigInteger('user_id')->nullable();
+            $table->unsignedBigInteger('service_type_id')->nullable();
+            $table->enum('status', ['P', 'IP', 'C'])->comment('P:Pending', 'IP:In-Progress', 'C:Completed');
             $table->timestamps();
 
             $table->foreign('car_service_id')->references('id')->on('car_services')->onDelete('cascade');

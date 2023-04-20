@@ -13,10 +13,10 @@ return new class extends Migration
     {
         Schema::create('garages', function (Blueprint $table) {
             $table->id();
-            $table->unsignedBigInteger('city_id');
-            $table->unsignedBigInteger('state_id');
-            $table->unsignedBigInteger('country_id');
-            $table->unsignedBigInteger('user_id');
+            $table->unsignedBigInteger('city_id')->nullable();
+            $table->unsignedBigInteger('state_id')->nullable();
+            $table->unsignedBigInteger('country_id')->nullable();
+            $table->unsignedBigInteger('user_id')->nullable();
             $table->string('name', 30);
             $table->string('address1', 100);
             $table->string('address2', 100)->nullable();

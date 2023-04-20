@@ -9,11 +9,11 @@ use Illuminate\Mail\Mailables\Content;
 use Illuminate\Mail\Mailables\Envelope;
 use Illuminate\Queue\SerializesModels;
 
-class ServiceMail extends Mailable
+class UpdateCarMail extends Mailable
 {
     use Queueable, SerializesModels;
-
     public $owner, $car, $services;
+
     /**
      * Create a new message instance.
      */
@@ -30,7 +30,7 @@ class ServiceMail extends Mailable
     public function envelope(): Envelope
     {
         return new Envelope(
-            subject: 'Service Mail',
+            subject: 'Update Car Mail',
         );
     }
 
@@ -40,7 +40,7 @@ class ServiceMail extends Mailable
     public function content(): Content
     {
         return new Content(
-            markdown: 'emails.service',
+            markdown: 'emails.updateCar',
         );
     }
 

@@ -15,13 +15,15 @@ class CountryController extends Controller
      */
     public function list(Request $request)
     {
-        $request->validate([
-            'search'        => 'nullable|string',
-            'sortOrder'     => 'nullable|in:asc,desc',
-            'sortField'     => 'nullable|string',
-            'perPage'       => 'nullable|integer',
-            'currentPage'   => 'nullable|integer'
-        ]);
+        $request->validate(
+            [
+                'search'        => 'nullable|string',
+                'sortOrder'     => 'nullable|in:asc,desc',
+                'sortField'     => 'nullable|string',
+                'perPage'       => 'nullable|integer',
+                'currentPage'   => 'nullable|integer'
+            ]
+        );
         $query = Country::query(); //query
 
         /* Searching */
@@ -29,7 +31,7 @@ class CountryController extends Controller
             $query = $query->where("name", "LIKE", "%{$request->search}%");
         }
         /* Sorting */
-        if ($request->sortField || $request->sortOrder) {
+        if ($request->sortField && $request->sortOrder) {
             $query = $query->orderBy($request->sortField, $request->sortOrder);
         }
 
@@ -41,10 +43,9 @@ class CountryController extends Controller
             $query          = $query->skip($perPage * ($currentPage - 1))->take($perPage);
         }
         /* Get records */
-        $countries   = $query->get();
-        $data       = [
+        $data               = [
             'count'         => $count,
-            'countries'     => $countries
+            'countries'     => $query->get()
         ];
         return ok('Country list', $data);
     }
@@ -57,9 +58,11 @@ class CountryController extends Controller
      */
     public function create(Request $request)
     {
-        $request->validate([
-            'name'         => 'required|alpha|max:30',
-        ]);
+        $request->validate(
+            [
+                'name'         => 'required|string|max:30',
+            ]
+        );
         $country = Country::create($request->only('name'));
         return ok('Country created successfully!', $country);
     }
@@ -85,9 +88,11 @@ class CountryController extends Controller
     public function update(Request $request, $id)
     {
         $country = Country::findOrFail($id);
-        $request->validate([
-            'name'         => 'required|alpha|max:30',
-        ]);
+        $request->validate(
+            [
+                'name'         => 'required|string|max:30',
+            ]
+        );
         $country->update($request->only('name'));
         return ok('Country updated successfully!', $country);
     }
